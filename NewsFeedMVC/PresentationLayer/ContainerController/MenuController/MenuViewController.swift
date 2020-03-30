@@ -50,7 +50,7 @@ private extension MenuViewController {
         tableView.separatorStyle = .none
         tableView.rowHeight = 60
         tableView.backgroundColor = SourceColors.commonLightBlueColor
-        tableView.contentInset = UIEdgeInsetsMake(0, 0, 90, 0)
+        tableView.contentInset = UIEdgeInsets.init(top: 0, left: 0, bottom: 90, right: 0)
         
         // tableView constraints
         tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 0).isActive = true

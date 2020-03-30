@@ -11,15 +11,12 @@ import WebKit
 
 class NewsSourceScreenController: UIViewController {
     
-    // MARK: - IBOutltes
+    // MARK: - Private Properties
     
-    @IBOutlet private weak var webView: WKWebView!
+    private var webView: WKWebView!
+    private var activityIndicator: UIActivityIndicatorView!
     
-    // MARK: - Private Variables
-    
-    var activityIndicator: UIActivityIndicatorView!
-    
-    // MARK: - Variables
+    // MARK: - Public Properties
     
     var resourceURL: String?
     
@@ -35,7 +32,7 @@ class NewsSourceScreenController: UIViewController {
     }
     
     override func loadView() {
-        
+
         webView = WKWebView(frame: .zero, configuration: WKWebViewConfiguration())
         self.view = webView
     }
@@ -80,7 +77,7 @@ private extension NewsSourceScreenController {
         
         activityIndicator = UIActivityIndicatorView()
         activityIndicator.hidesWhenStopped = true
-        activityIndicator.activityIndicatorViewStyle = .whiteLarge
+        activityIndicator.style = .whiteLarge
         activityIndicator.color = SourceColors.commonBackgroundColor
         activityIndicator.translatesAutoresizingMaskIntoConstraints = false
         webView.addSubview(activityIndicator)

@@ -51,23 +51,10 @@ extension DefaultNewsTableViewCell {
         newsTitleLabel.text = model.newsTitle
         
         // Using SDWebImage Pod
-        //    if model.imageURL.isEmpty {
-        //      newsImageView.image = SourceImages.emptyPhotoImage
-        //    } else {
-        //      newsImageView.sd_setImage(with: URL(string: model.imageURL), completed: nil)
-        //
-        
-        if model.imageURL.isEmpty {
-            newsImageView.image = SourceImages.emptyPhotoImage
-        } else {
-            let url = model.imageURL
-            ServiceAPI.shared.getImageBy(model.imageURL as NSString) { (image) in
-                DispatchQueue.main.async {
-                    if url == model.imageURL {
-                        self.newsImageView.image = image
-                    }
-                }
-            }
+            if model.imageURL.isEmpty {
+              newsImageView.image = SourceImages.emptyPhotoImage
+            } else {
+              newsImageView.sd_setImage(with: URL(string: model.imageURL), completed: nil)
         }
         
         if model.isViewed {

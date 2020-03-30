@@ -86,7 +86,7 @@ final class InteractiveModalPresentationController: UIPresentationController {
     // MARK: - Supporting Methods
     
     private func setBlurEffect(for containerView: UIView) -> UIVisualEffectView {
-        let blurEffect = UIBlurEffect(style: UIBlurEffectStyle.light)
+        let blurEffect = UIBlurEffect(style: UIBlurEffect.Style.light)
         let blurEffectView = UIVisualEffectView(effect: blurEffect)
         blurEffectView.frame = containerView.bounds
         blurEffectView.autoresizingMask = [.flexibleWidth, .flexibleHeight]

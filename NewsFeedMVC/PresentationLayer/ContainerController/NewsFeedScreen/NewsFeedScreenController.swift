@@ -150,7 +150,7 @@ private extension NewsFeedScreenController {
         tableView.register(defaultCellNib, forCellReuseIdentifier: defaultCellReuseID)
         tableView.register(extendedCellNib, forCellReuseIdentifier: extendedCellReuseID)
         
-        tableView.rowHeight = UITableViewAutomaticDimension
+        tableView.rowHeight = UITableView.automaticDimension
         tableView.estimatedRowHeight = 800
         
         tableView.delegate    = self
@@ -191,7 +191,7 @@ private extension NewsFeedScreenController {
     // MARK: - Configure Spinner
     
     func configureSpinner() {
-        spinner.activityIndicatorViewStyle = .whiteLarge
+        spinner.style = .whiteLarge
         spinner.color = SourceColors.commonBackgroundColor
     }
     
@@ -199,7 +199,7 @@ private extension NewsFeedScreenController {
     
     func configureFooterView() {
         footerView.addSubview(downloadButton)
-        downloadButton.addTarget(self, action: #selector(actionFooterButton), for: UIControlEvents.touchUpInside)
+        downloadButton.addTarget(self, action: #selector(actionFooterButton), for: UIControl.Event.touchUpInside)
 
         // footerButton constraints
         downloadButton.centerXAnchor.constraint(equalTo: footerView.centerXAnchor).isActive = true

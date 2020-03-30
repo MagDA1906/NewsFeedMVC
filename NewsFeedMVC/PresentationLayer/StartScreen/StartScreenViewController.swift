@@ -57,7 +57,7 @@ private extension StartScreenViewController {
     
     func configureSpinner() {
         
-        spinner.activityIndicatorViewStyle = .whiteLarge
+        spinner.style = .whiteLarge
         spinner.color = UIColor.white
     }
 }

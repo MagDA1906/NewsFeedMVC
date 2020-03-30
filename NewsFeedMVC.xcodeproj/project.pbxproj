@@ -30,7 +30,6 @@
 		9D7C5CB6236F7E46004F81D5 /* StringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D7C5CB5236F7E46004F81D5 /* StringExtension.swift */; };
 		9D7E66F02395A2F9000BC5C1 /* WebImageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D7E66EF2395A2F9000BC5C1 /* WebImageService.swift */; };
 		9D7E66F42395C21D000BC5C1 /* NewsSourceScreenController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D7E66F22395C21D000BC5C1 /* NewsSourceScreenController.swift */; };
-		9D7E66F52395C21D000BC5C1 /* NewsSourceScreenControllerViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9D7E66F32395C21D000BC5C1 /* NewsSourceScreenControllerViewController.xib */; };
 		9D82DA8723A02C2700D92BC3 /* UIViewExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D82DA8623A02C2700D92BC3 /* UIViewExtension.swift */; };
 		9D8BFB7223B01128009A86E3 /* SettingsScreenController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D8BFB7023B01128009A86E3 /* SettingsScreenController.swift */; };
 		9D8BFB7323B01128009A86E3 /* SettingsScreenViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9D8BFB7123B01128009A86E3 /* SettingsScreenViewController.xib */; };
@@ -75,7 +74,6 @@
 		9D7C5CB5236F7E46004F81D5 /* StringExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringExtension.swift; sourceTree = "<group>"; };
 		9D7E66EF2395A2F9000BC5C1 /* WebImageService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebImageService.swift; sourceTree = "<group>"; };
 		9D7E66F22395C21D000BC5C1 /* NewsSourceScreenController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewsSourceScreenController.swift; sourceTree = "<group>"; };
-		9D7E66F32395C21D000BC5C1 /* NewsSourceScreenControllerViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = NewsSourceScreenControllerViewController.xib; sourceTree = "<group>"; };
 		9D82DA8623A02C2700D92BC3 /* UIViewExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIViewExtension.swift; sourceTree = "<group>"; };
 		9D8BFB7023B01128009A86E3 /* SettingsScreenController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsScreenController.swift; sourceTree = "<group>"; };
 		9D8BFB7123B01128009A86E3 /* SettingsScreenViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SettingsScreenViewController.xib; sourceTree = "<group>"; };
@@ -274,7 +272,6 @@
 			isa = PBXGroup;
 			children = (
 				9D7E66F22395C21D000BC5C1 /* NewsSourceScreenController.swift */,
-				9D7E66F32395C21D000BC5C1 /* NewsSourceScreenControllerViewController.xib */,
 			);
 			path = NewsSourceScreen;
 			sourceTree = "<group>";
@@ -367,6 +364,7 @@
 				TargetAttributes = {
 					9D4591CE2367751B00B1A0C3 = {
 						CreatedOnToolsVersion = 9.4.1;
+						LastSwiftMigration = 1030;
 					};
 				};
 			};
@@ -401,7 +399,6 @@
 				9D7C5CB1236F6B3E004F81D5 /* DefaultNewsTableViewCell.xib in Resources */,
 				9D91CDFC23983E2C007763A1 /* StartScreenViewController.xib in Resources */,
 				9D7C5CA9236F6901004F81D5 /* LaunchScreen.storyboard in Resources */,
-				9D7E66F52395C21D000BC5C1 /* NewsSourceScreenControllerViewController.xib in Resources */,
 				9D6BDF542368E94600484A9B /* Images.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -605,7 +602,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.magilnitsky.NewsFeedMVC;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -624,7 +621,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.magilnitsky.NewsFeedMVC;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;

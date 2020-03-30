@@ -89,7 +89,7 @@ private extension ContainerViewController {
         let newsFeedController = NewsFeedScreenController()
         controller = newsFeedController
         view.addSubview(controller.view)
-        addChildViewController(controller)
+        addChild(controller)
     }
     
     // MARK: - Initialized MenuViewController
@@ -98,7 +98,7 @@ private extension ContainerViewController {
         if menuController == nil {
             menuController = MenuViewController()
             view.insertSubview(menuController.view, at: 0)
-            addChildViewController(menuController)
+            addChild(menuController)
         }
         
         guard let menuVC = menuController as? MenuViewController else {
