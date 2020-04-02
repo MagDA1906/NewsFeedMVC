@@ -1,18 +1,34 @@
 PODS:
+  - Alamofire (5.0.5)
   - SDWebImage (4.4.7):
     - SDWebImage/Core (= 4.4.7)
   - SDWebImage/Core (4.4.7)
+  - SwiftyXMLParser (5.1.0)
 
 DEPENDENCIES:
+  - Alamofire (~> 5.0)
   - SDWebImage (= 4.4.7)
+  - SwiftyXMLParser (from `https://github.com/yahoojapan/SwiftyXMLParser.git`)
 
 SPEC REPOS:
   trunk:
+    - Alamofire
     - SDWebImage
 
-SPEC CHECKSUMS:
-  SDWebImage: c10d14a8883ebd89664f02a422006f66a85c0c5d
+EXTERNAL SOURCES:
+  SwiftyXMLParser:
+    :git: https://github.com/yahoojapan/SwiftyXMLParser.git
 
-PODFILE CHECKSUM: fe86e7420134adc694ecb9746f5af4876015fec0
+CHECKOUT OPTIONS:
+  SwiftyXMLParser:
+    :commit: bc85162ecee60d6eb94b778648bc4c51e1c4d34f
+    :git: https://github.com/yahoojapan/SwiftyXMLParser.git
+
+SPEC CHECKSUMS:
+  Alamofire: df2f8f826963b08b9a870791ad48e07a10090b2e
+  SDWebImage: c10d14a8883ebd89664f02a422006f66a85c0c5d
+  SwiftyXMLParser: 8271497e0a37b5c04b0b167c77b4896e36175a21
+
+PODFILE CHECKSUM: c3b1e97f66ab8bf66a4e9c1bb33e3be79ff92ee3
 
 COCOAPODS: 1.8.3

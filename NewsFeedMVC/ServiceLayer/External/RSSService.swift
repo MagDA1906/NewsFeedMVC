@@ -30,21 +30,25 @@ class RSSService: NSObject, RSSServiceProtocol {
         
         let dispatchGroup = DispatchGroup()
         
+        dispatchGroup.enter()
         if let lentaURL = urlLentaRu {
             let lentaWorkItem = DispatchWorkItem { [weak self] in
                 let newsParser: NewsParserProtocol = NewsParser()
                 newsParser.fetchNewsAtUrl(lentaURL) { (news) in
                     self?.lentaNews = news
+                    dispatchGroup.leave()
                 }
             }
             DispatchQueue.global().async(group: dispatchGroup, execute: lentaWorkItem)
         }
         
+        dispatchGroup.enter()
         if let gazetaUrl = urlGazetaRu {
             let gazetaWorkItem = DispatchWorkItem { [weak self] in
                 let newsParser: NewsParserProtocol = NewsParser()
                 newsParser.fetchNewsAtUrl(gazetaUrl) { (news) in
                     self?.gazetaNews = news
+                    dispatchGroup.leave()
                 }
             }
             DispatchQueue.global().async(group: dispatchGroup, execute: gazetaWorkItem)

@@ -7,6 +7,8 @@
 //
 
 import Foundation
+import Alamofire
+import SwiftyXMLParser
 
 protocol NewsParserProtocol {
     func fetchNewsAtUrl(_ url: URL, completion: @escaping ([NewsModel]) -> ())
@@ -15,92 +17,33 @@ protocol NewsParserProtocol {
 
 class NewsParser: NSObject, NewsParserProtocol {
     
-    private var currentTag: String?
-    private var itemFlag = false
-    private var channelFlag = false
-    private var resource = ""
-    
-    private var news: NewsModel?
-    private var feedNews = [NewsModel]()
+    private var newsModel: NewsModel!
+    private var models = [NewsModel]()
     
     func fetchNewsAtUrl(_ url: URL, completion: @escaping ([NewsModel]) -> ()) {
-        
-        guard let parser = XMLParser(contentsOf: url) else {
-            completion([])
-            return
-        }
-        
-        parser.delegate = self
-        parser.parse()
-        completion(feedNews)
-    }
-}
+        print(url)
+        AF.request(url).response { (response) in
+            if let data = response.data {
+                let xml = XML.parse(data)
+                var itemNumber = 0
+                
+                while xml.rss.channel.item[itemNumber].text != nil {
 
-extension NewsParser: XMLParserDelegate {
-    
-    func parser(_ parser: XMLParser, parseErrorOccurred parseError: Error) {
-        print("Parse ERROR: \(parseError)")
-    }
-    
-    func parser(_ parser: XMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [String : String]) {
-        currentTag = elementName
-        if elementName == "item" {
-            news = NewsModel(newsResource: "", newsLink: "", newsTitle: "", newsDescription: "", dateOfCreation: "", imageURL: "", category: "")
-            itemFlag = true
-        }
-        
-        if elementName == "enclosure" {
-            let attrsUrl = attributeDict as [String:String]
-            let urlPic = attrsUrl["url"]
-            guard let imageURL = urlPic else {
-                return
-            }
-            news?.imageURL = imageURL
-        }
-        
-        if elementName == "channel" {
-            channelFlag = true
-        }
-    }
-    
-    func parser(_ parser: XMLParser, didEndElement elementName: String, namespaceURI: String?, qualifiedName qName: String?) {
-        
-        if elementName == "item" {
-            news?.newsResource = resource
-            if let news = news {
-                feedNews.append(news)
-                print("Title: \(news.newsTitle) NewsResource: \(news.newsResource) Category: \(news.category)")
-            }
-            news = nil
-            itemFlag = false
-        }
-    }
-    
-    func parser(_ parser: XMLParser, foundCharacters string: String) {
-        if itemFlag {
-            if let tempNews = news {
-                if let tempElement = currentTag {
-                    switch tempElement {
-                    case "title":
-                        news?.newsTitle = tempNews.newsTitle + string
-                    case "description":
-                        news?.newsDescription = tempNews.newsDescription + string
-                    case "link":
-                        news?.newsLink = tempNews.newsLink + string
-                    case "pubDate":
-                        news?.dateOfCreation = tempNews.dateOfCreation + string
-                    case "category":
-                        news?.category = tempNews.category + string
-                    default:
-                        break
-                    }
+                    self.newsModel = NewsModel()
+
+                    self.newsModel.newsResource     = xml["rss"]["channel"]["item"][itemNumber]["link"].text ?? ""
+                    self.newsModel.newsLink         = xml["rss"]["channel"]["item"][itemNumber]["link"].text ?? ""
+                    self.newsModel.newsTitle        = xml["rss"]["channel"]["item"][itemNumber]["title"].text ?? ""
+                    self.newsModel.newsDescription  = xml["rss"]["channel"]["item"][itemNumber]["description"].text ?? ""
+                    self.newsModel.imageURL         = xml["rss"]["channel"]["item"][itemNumber]["enclosure"].attributes["url"] ?? ""
+                    self.newsModel.dateOfCreation   = xml["rss"]["channel"]["item"][itemNumber]["pubDate"].text ?? ""
+                    self.newsModel.category         = xml["rss"]["channel"]["item"][itemNumber]["category"].text ?? ""
+
+                    self.models.append(self.newsModel)
+                    itemNumber += 1
                 }
-            }
-        }
-        if channelFlag {
-            if currentTag == "title" {
-                resource = resource + string
-                channelFlag = false
+                let uniqueModels = self.models.removingDuplicates()
+                completion(uniqueModels)
             }
         }
     }

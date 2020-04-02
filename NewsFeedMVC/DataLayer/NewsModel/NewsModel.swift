@@ -30,4 +30,6 @@ struct NewsModel: Hashable, Equatable {
         self.imageURL = imageURL
         self.category = category
     }
+    
+    init() {}
 }
