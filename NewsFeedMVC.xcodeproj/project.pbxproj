@@ -3,10 +3,11 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 51;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9D29F6972436822800874BDA /* ArrayExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D29F6962436822800874BDA /* ArrayExtension.swift */; };
 		9D4591D32367751B00B1A0C3 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D4591D22367751B00B1A0C3 /* AppDelegate.swift */; };
 		9D4591D52367751B00B1A0C3 /* NewsFeedScreenController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D4591D42367751B00B1A0C3 /* NewsFeedScreenController.swift */; };
 		9D4591DA2367751E00B1A0C3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9D4591D92367751E00B1A0C3 /* Assets.xcassets */; };
@@ -48,6 +49,7 @@
 		17D70EA3CAC198D6C26924E4 /* Pods-NewsFeedMVC.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NewsFeedMVC.release.xcconfig"; path = "Target Support Files/Pods-NewsFeedMVC/Pods-NewsFeedMVC.release.xcconfig"; sourceTree = "<group>"; };
 		69BB9D98F8F1020C730161AB /* Pods-NewsFeedMVC.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NewsFeedMVC.debug.xcconfig"; path = "Target Support Files/Pods-NewsFeedMVC/Pods-NewsFeedMVC.debug.xcconfig"; sourceTree = "<group>"; };
 		9A00269124A8026482C1F1E1 /* Pods_NewsFeedMVC.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NewsFeedMVC.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		9D29F6962436822800874BDA /* ArrayExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArrayExtension.swift; sourceTree = "<group>"; };
 		9D4591CF2367751B00B1A0C3 /* NewsFeedMVC.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NewsFeedMVC.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9D4591D22367751B00B1A0C3 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		9D4591D42367751B00B1A0C3 /* NewsFeedScreenController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewsFeedScreenController.swift; sourceTree = "<group>"; };
@@ -261,6 +263,7 @@
 			children = (
 				9D7C5CB5236F7E46004F81D5 /* StringExtension.swift */,
 				9D82DA8623A02C2700D92BC3 /* UIViewExtension.swift */,
+				9D29F6962436822800874BDA /* ArrayExtension.swift */,
 			);
 			path = Extesions;
 			sourceTree = "<group>";
@@ -426,7 +429,13 @@
 			buildActionMask = 2147483647;
 			files = (
 			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-NewsFeedMVC/Pods-NewsFeedMVC-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
 			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-NewsFeedMVC/Pods-NewsFeedMVC-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-NewsFeedMVC/Pods-NewsFeedMVC-frameworks.sh\"\n";
@@ -464,6 +473,7 @@
 				9D6BDF502368E2FC00484A9B /* SourceColors.swift in Sources */,
 				9D7934DC2376007600B9659E /* ServiceManager.swift in Sources */,
 				9D7E66F42395C21D000BC5C1 /* NewsSourceScreenController.swift in Sources */,
+				9D29F6972436822800874BDA /* ArrayExtension.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
