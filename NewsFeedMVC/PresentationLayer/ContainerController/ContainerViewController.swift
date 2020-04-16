@@ -62,7 +62,7 @@ private extension ContainerViewController {
         navigationItem.hidesBackButton = true
         
         navigationController?.setNavigationBarHidden(false, animated: true)
-        navigationController?.navigationBar.barTintColor = SourceColors.commonBackgroundColor
+        navigationController?.navigationBar.barTintColor = SourceColors.labelRedColor
         navigationController?.navigationBar.isTranslucent = false
         
         navigationItem.title = categoryName

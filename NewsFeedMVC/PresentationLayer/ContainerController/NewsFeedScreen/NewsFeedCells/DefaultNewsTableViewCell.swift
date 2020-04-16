@@ -17,11 +17,11 @@ class DefaultNewsTableViewCell: UITableViewCell {
     
     // MARK: - IBOutlets
     
-    @IBOutlet private weak var newsResourceLabel: UILabel!
-    @IBOutlet private weak var newsTitleLabel: UILabel!
-    
+    @IBOutlet private weak var titleLabel: UILabel!
+    @IBOutlet private weak var descriptionLabel: UILabel!
+    @IBOutlet private weak var resourceLabel: UILabel!
     @IBOutlet private weak var newsImageView: UIImageView!
-    
+    @IBOutlet private weak var dateLabel: UILabel!
     @IBOutlet private weak var backView: UIView!
     
     // MARK: - Life Cycle
@@ -35,8 +35,10 @@ class DefaultNewsTableViewCell: UITableViewCell {
     override func prepareForReuse() {
         super.prepareForReuse()
         
-        newsResourceLabel.text = ""
-        newsTitleLabel.text = ""
+        titleLabel.text = ""
+        descriptionLabel.text = ""
+        resourceLabel.text = ""
+        dateLabel.text = ""
         newsImageView.image = nil
     }
 }
@@ -47,8 +49,12 @@ extension DefaultNewsTableViewCell {
     
     func setupWithModel(_ model: NewsModel) {
         
-        newsResourceLabel.text = getTextSeparatedBySpaceFromModel(model)
-        newsTitleLabel.text = model.newsTitle
+        print("Model Date: \(model.dateOfCreation)")
+        
+        titleLabel.text = model.newsTitle
+        descriptionLabel.text = model.newsDescription
+        resourceLabel.text = model.newsResource
+        dateLabel.text = model.formattedDate
         
         // Using SDWebImage Pod
             if model.imageURL.isEmpty {
@@ -71,33 +77,31 @@ private extension DefaultNewsTableViewCell {
     
     func configureSelf() {
         
-        backgroundColor = SourceColors.commonBackgroundColor
-        contentView.frame = contentView.frame.insetBy(dx: 4, dy: 4)
-        
         configureLabels()
         configureView()
+        configureImageView()
     }
     
     func configureLabels() {
         
-        newsResourceLabel.textColor = SourceColors.commonBackgroundColor
-        
-        newsTitleLabel.numberOfLines = 5
-        newsTitleLabel.textColor = SourceColors.commonDarkGreyColor
+        titleLabel.numberOfLines = 3
+        descriptionLabel.numberOfLines = 2
+        resourceLabel.numberOfLines = 1
+        dateLabel.numberOfLines = 1
     }
     
     func configureView() {
         
-        backView.layer.borderWidth = 2
-        backView.layer.borderColor = SourceColors.commonLightGreyColor.cgColor
+        backView.layer.borderWidth = 1
+        backView.layer.borderColor = SourceColors.commonDarkGreyColor.cgColor
         backView.layer.cornerRadius = 8
         backView.layer.masksToBounds = true
     }
     
-    func getTextSeparatedBySpaceFromModel(_ model: NewsModel) -> String {
+    func configureImageView() {
         
-        var separatedString = model.newsResource
-        separatedString.getCharBeforeSpace()
-        return separatedString
+        newsImageView.contentMode = .scaleAspectFill
+        newsImageView.layer.cornerRadius = 8
+        newsImageView.layer.masksToBounds = true
     }
 }

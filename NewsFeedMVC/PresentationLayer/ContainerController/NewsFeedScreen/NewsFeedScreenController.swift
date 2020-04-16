@@ -14,6 +14,9 @@ protocol NewsFeedScreenControllerProtocol {
 
 class NewsFeedScreenController: UIViewController, NewsFeedScreenControllerProtocol {
     
+    private let rssService = RSSService()
+    private let storageManager = StorageManager()
+    
     private enum State {
         
         case expanded
@@ -38,7 +41,7 @@ class NewsFeedScreenController: UIViewController, NewsFeedScreenControllerProtoc
     private var currentIndexPath: IndexPath?
     private var oldIndexPath: IndexPath?
     private var state: State = .collapsed
-    private var quantityNews = 10
+    private var numberOfNews = 10
     
     private let downloadButton: UIButton = {
         let button = UIButton(type: .custom)
@@ -60,7 +63,7 @@ class NewsFeedScreenController: UIViewController, NewsFeedScreenControllerProtoc
     // MARK: - IBOutlets
     
     @IBOutlet private weak var tableView: UITableView!
-    @IBOutlet private weak var spinner: UIActivityIndicatorView!
+    @IBOutlet private weak var searchbar: UISearchBar!
     
     // MARK: - Life Cycle
     
@@ -69,13 +72,8 @@ class NewsFeedScreenController: UIViewController, NewsFeedScreenControllerProtoc
         print("NewsFeedScreenController is load")
         
         fetchNews()
-    
         addTapGestureRecognizer()
-        
         configureTableView()
-        configureSpinner()
-        
-        tableView.reloadData()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -99,17 +97,12 @@ extension NewsFeedScreenController {
 private extension NewsFeedScreenController {
     
     func fetchNews() {
-        
-        spinner.startAnimating()
-        
-        ServiceAPI.shared.fetchNews { (didFetch) in
-            if didFetch {
-                
-                DispatchQueue.main.async {
-                    self.tableView.reloadData()
-                    self.spinner.stopAnimating()
-                    self.spinner.hidesWhenStopped = true
-                }
+        rssService.fetchNews { [weak self] (models) in
+            guard let self = self else { return }
+            DispatchQueue.main.async {
+                self.storageManager.save(data: models)
+                // TODO: Check empty array
+                self.tableView.reloadData()
             }
         }
     }
@@ -151,16 +144,12 @@ private extension NewsFeedScreenController {
         tableView.register(extendedCellNib, forCellReuseIdentifier: extendedCellReuseID)
         
         tableView.rowHeight = UITableView.automaticDimension
-        tableView.estimatedRowHeight = 800
+        tableView.estimatedRowHeight = 600
         
         tableView.delegate    = self
         tableView.dataSource  = self
         
         tableView.separatorColor = .clear
-        tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
-        tableView.backgroundColor = SourceColors.commonBackgroundColor
-        
-        view.backgroundColor = SourceColors.commonBackgroundColor
         
         configureFooterView()
         
@@ -173,7 +162,8 @@ private extension NewsFeedScreenController {
         guard let defaultCell = cell as? DefaultNewsTableViewCell else {
             return cell
         }
-        defaultCell.setupWithModel(ServiceAPI.shared.getNewsAtIndexPath(indexPath))
+//        defaultCell.setupWithModel(ServiceAPI.shared.getNewsAtIndexPath(indexPath))
+        defaultCell.setupWithModel(storageManager.getModel(by: indexPath))
         return defaultCell
     }
     
@@ -184,15 +174,8 @@ private extension NewsFeedScreenController {
         guard let extendedCell = cell as? ExtendedNewsTableViewCell else {
             return cell
         }
-        extendedCell.setupWithModel(ServiceAPI.shared.getNewsAtIndexPath(indexPath))
+        extendedCell.setupWithModel(storageManager.getModel(by: indexPath))
         return extendedCell
-    }
-    
-    // MARK: - Configure Spinner
-    
-    func configureSpinner() {
-        spinner.style = .whiteLarge
-        spinner.color = SourceColors.commonBackgroundColor
     }
     
     // MARK: - Configure FooterView
@@ -210,7 +193,7 @@ private extension NewsFeedScreenController {
     
     @objc func actionFooterButton(_ sender: UIButton) {
         print("Footer button is taped!")
-        dowmloadCounter = dowmloadCounter + quantityNews
+        dowmloadCounter = dowmloadCounter + numberOfNews
         tableView.reloadData()
         aniamteDownloadButton(sender)
     }
@@ -240,22 +223,21 @@ extension NewsFeedScreenController: UITableViewDelegate {
         if state == .collapsed {
             
             if cell is DefaultNewsTableViewCell {
-                
                 tableView.beginUpdates()
                 state = state.change
                 tableView.reloadRows(at: [indexPath], with: .right)
                 currentIndexPath = indexPath
                 tableView.endUpdates()
+                tableView.scrollToRow(at: indexPath, at: .top, animated: true)
             }
         } else {
             
             if cell is ExtendedNewsTableViewCell {
-                
                 tableView.beginUpdates()
                 state = state.change
                 tableView.reloadRows(at: [indexPath], with: .left)
                 tableView.endUpdates()
-                
+                tableView.scrollToRow(at: indexPath, at: .middle, animated: true)
             } else {
                 
                 tableView.beginUpdates()
@@ -266,17 +248,24 @@ extension NewsFeedScreenController: UITableViewDelegate {
                 if let oldIndex = oldIndexPath {
                     tableView.reloadRows(at: [oldIndex], with: .left)
                 }
-                
                 tableView.endUpdates()
+                tableView.scrollToRow(at: indexPath, at: .top, animated: true)
             }
         }
+    }
+    
+    func animateFor(_ cell: UITableViewCell) {
         
+        cell.frame = CGRect(x: cell.frame.origin.x, y: cell.frame.origin.y, width: cell.bounds.width, height: cell.bounds.height)
+        UIView.animate(withDuration: 2.0) {
+            
+        }
     }
     
     // Hide or show DownloadButton
     
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        if (ServiceAPI.shared.getNews().count - dowmloadCounter) > quantityNews  {
+        if (ServiceAPI.shared.getNews().count - dowmloadCounter) > numberOfNews  {
             downloadButton.isHidden = false
         } else {
             downloadButton.isHidden = true
@@ -288,7 +277,8 @@ extension NewsFeedScreenController: UITableViewDelegate {
 
 extension NewsFeedScreenController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return ServiceAPI.shared.getNews().prefix(quantityNews + dowmloadCounter).count
+//        return ServiceAPI.shared.getNews().prefix(numberOfNews + dowmloadCounter).count
+        return storageManager.getNumberOfElements()
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
