@@ -65,6 +65,9 @@ private extension ContainerViewController {
         navigationController?.navigationBar.barTintColor = SourceColors.labelRedColor
         navigationController?.navigationBar.isTranslucent = false
         
+        let textAttributes = [NSAttributedString.Key.foregroundColor:UIColor.white]
+        navigationController?.navigationBar.titleTextAttributes = textAttributes
+        
         navigationItem.title = categoryName
     }
     
@@ -90,6 +93,7 @@ private extension ContainerViewController {
         controller = newsFeedController
         view.addSubview(controller.view)
         addChild(controller)
+        
     }
     
     // MARK: - Initialized MenuViewController

@@ -16,6 +16,6 @@ enum SourceImages {
     
     static let emptyPhotoImage = UIImage(named: "emptyPhotoImage")!
     static let settingsIcon = UIImage(named: "settingsIcon")!
-    static let startScreenImage = UIImage(named: "startScreenImage")!
+    static let startScreenImage = UIImage(named: "startScreenImage")! // unused!!
     static let downloadImage = UIImage(named: "downloadImage")!
 }

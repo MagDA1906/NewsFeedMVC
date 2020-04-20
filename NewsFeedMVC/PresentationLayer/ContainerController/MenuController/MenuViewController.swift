@@ -12,6 +12,8 @@ class MenuViewController: UIViewController {
     
     // MARK: - Private Properties
     
+    private let rssService = RSSService()
+    
     private var tableView: UITableView!
     private var timer: Timer?
     
@@ -104,6 +106,15 @@ private extension MenuViewController {
         timer?.invalidate()
         timer = nil
     }
+    
+    // fetch news using selected category
+    func fetchNews(using category: MenuModel) {
+        rssService.fetchNews { models in
+            DispatchQueue.main.async {
+                StorageManager.shared.save(data: models, by: category)
+            }
+        }
+    }
 }
 
 // MARK: - UITableViewDelegate
@@ -125,7 +136,7 @@ extension MenuViewController: UITableViewDelegate {
             print("Settings is tapped")
             AppCoordinator.shared.goToSettingsScreenController(from: self)
         } else {
-            ServiceAPI.shared.storeNews(by: menuModel)
+            fetchNews(using: menuModel)
             categoryName = menuModel.description
         }
         startTimer()

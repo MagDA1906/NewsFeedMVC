@@ -8,31 +8,33 @@
 
 import Foundation
 
-//private enum ReturnType {
-//    case returnString
-//    case returnDate
-//}
-
 private enum DateError: String {
     case dateDecodingError = "Date decoding failed"
 }
 
 protocol StorageManagerProtocol {
     
-    // save request data to array
-    func save(data: [NewsModel])
+    // save request data to array by category
+    func save(data: [NewsModel], by category: MenuModel)
     // get saved data by index path
     func getModel(by indexPath: IndexPath) -> NewsModel
     // get number of elements
     func getNumberOfElements() -> Int
+    // set news property isViewed to true
+    func setModelToViewedState(by indexPath: IndexPath)
 }
 
 class StorageManager: StorageManagerProtocol {
     
+    static let shared = StorageManager()
+    
+    init() {}
+    
     var models = [NewsModel]()
     
-    func save(data: [NewsModel]) {
+    func save(data: [NewsModel], by category: MenuModel) {
         // prepare before save
+        models.removeAll()
         var sortedModels = sortByDate(data)
         
         for index in sortedModels.indices {
@@ -40,15 +42,33 @@ class StorageManager: StorageManagerProtocol {
             sortedModels[index].newsDescription.replacingNewlineCharWithSpace()
             sortedModels[index].newsDescription.replacingDoubleSpace()
         }
-        models = sortedModels
+        // save models by category
+        if category == .AllNews {
+            models = sortedModels
+        } else {
+            for model in sortedModels {
+                let categoryFromModel = model.category
+                if categoryFromModel == category.description {
+                    models.append(model)
+                }
+            }
+        }
     }
-    
+        
     func getModel(by indexPath: IndexPath) -> NewsModel {
         return models[indexPath.row]
     }
     
     func getNumberOfElements() -> Int {
         return models.count
+    }
+    
+    func setModelToViewedState(by indexPath: IndexPath) {
+        models[indexPath.row].isViewed = true
+    }
+    
+    deinit {
+        print("StorageManager class is deinit!")
     }
 }
 
@@ -62,3 +82,4 @@ private extension StorageManager {
         return sortedModelsByDate
     }
 }
+

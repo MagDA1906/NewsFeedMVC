@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import SystemConfiguration
 
 protocol NewsFeedScreenControllerProtocol {
     var dowmloadCounter: Int { get set }
@@ -14,8 +15,12 @@ protocol NewsFeedScreenControllerProtocol {
 
 class NewsFeedScreenController: UIViewController, NewsFeedScreenControllerProtocol {
     
+    // MARK: - IBOutlets
+    
+    @IBOutlet private weak var tableView: UITableView!
+    @IBOutlet private weak var searchbar: UISearchBar!
+    
     private let rssService = RSSService()
-    private let storageManager = StorageManager()
     
     private enum State {
         
@@ -60,11 +65,6 @@ class NewsFeedScreenController: UIViewController, NewsFeedScreenControllerProtoc
         return view
     }()
     
-    // MARK: - IBOutlets
-    
-    @IBOutlet private weak var tableView: UITableView!
-    @IBOutlet private weak var searchbar: UISearchBar!
-    
     // MARK: - Life Cycle
     
     override func viewDidLoad() {
@@ -74,6 +74,7 @@ class NewsFeedScreenController: UIViewController, NewsFeedScreenControllerProtoc
         fetchNews()
         addTapGestureRecognizer()
         configureTableView()
+        configureSearchBar()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -86,9 +87,10 @@ class NewsFeedScreenController: UIViewController, NewsFeedScreenControllerProtoc
 // MARK: - Public Functions
 
 extension NewsFeedScreenController {
-    
+    // use in MenuViewController (delegate)
     func updateTableView() {
         tableView.reloadData()
+        tableView.scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: true)
     }
 }
 
@@ -100,8 +102,10 @@ private extension NewsFeedScreenController {
         rssService.fetchNews { [weak self] (models) in
             guard let self = self else { return }
             DispatchQueue.main.async {
-                self.storageManager.save(data: models)
-                // TODO: Check empty array
+                StorageManager.shared.save(data: models, by: .AllNews)
+                if models.isEmpty {
+                    self.showAlert()
+                }
                 self.tableView.reloadData()
             }
         }
@@ -126,7 +130,19 @@ private extension NewsFeedScreenController {
                 let frameInSuperView = cell.getViewForTap().convert(cell.getViewForTap().bounds, to: tableView)
                 
                 if frameInSuperView.contains(touch) {
-                    AppCoordinator.shared.goToNewsSourceScreenController(from: self, with: indexPath)
+                    tableView.allowsSelection = false
+                    let tappedView = cell.getViewForTap()
+                    UIView.animate(withDuration: 0.1, animations: {
+                        tappedView.transform = CGAffineTransform(scaleX: 1.1, y: 1.1)
+                    }) { (finished) in
+                        UIView.animate(withDuration: 0.1, animations: {
+                            tappedView.transform = CGAffineTransform(scaleX: 1.0, y: 1.0)
+                        }, completion: { [weak self] (finished) in
+                            guard let self = self else { return }
+                            self.tableView.allowsSelection = true
+                            AppCoordinator.shared.goToNewsSourceScreenController(from: self, with: indexPath)
+                        })
+                    }
                 }
             }
         }
@@ -162,8 +178,7 @@ private extension NewsFeedScreenController {
         guard let defaultCell = cell as? DefaultNewsTableViewCell else {
             return cell
         }
-//        defaultCell.setupWithModel(ServiceAPI.shared.getNewsAtIndexPath(indexPath))
-        defaultCell.setupWithModel(storageManager.getModel(by: indexPath))
+        defaultCell.setupWithModel(StorageManager.shared.getModel(by: indexPath))
         return defaultCell
     }
     
@@ -174,7 +189,7 @@ private extension NewsFeedScreenController {
         guard let extendedCell = cell as? ExtendedNewsTableViewCell else {
             return cell
         }
-        extendedCell.setupWithModel(storageManager.getModel(by: indexPath))
+        extendedCell.setupWithModel(StorageManager.shared.getModel(by: indexPath))
         return extendedCell
     }
     
@@ -209,6 +224,34 @@ private extension NewsFeedScreenController {
         springAnimation.autoreverses = true
         sender.layer.add(springAnimation, forKey: "transform.scale")
     }
+    
+    // MARK: - Cnfigure UISearchBar
+    
+    func configureSearchBar() {
+        
+        searchbar.barTintColor = SourceColors.labelRedColor
+    }
+    
+    func showAlert() {
+
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+        
+        let settingsAction = UIAlertAction(title: "Settings", style: .default) { (action) in
+            guard let settingsURL = URL(string: UIApplication.openSettingsURLString) else { return }
+            
+            if UIApplication.shared.canOpenURL(settingsURL) {
+                UIApplication.shared.open(settingsURL, completionHandler: { (success) in
+                    print("Settings opened: \(success)")
+                })
+            }
+        }
+
+        let alert = UIAlertController(title: "No internet connection", message: "Check your internet connection using Settings button, or press OK", preferredStyle: .alert)
+        alert.addAction(cancelAction)
+        alert.addAction(settingsAction)
+
+        self.present(alert, animated: true)
+    }
 }
 
 // MARK: - UITableViewDelegate
@@ -216,6 +259,7 @@ private extension NewsFeedScreenController {
 extension NewsFeedScreenController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        
         tableView.deselectRow(at: indexPath, animated: false)
         
         guard let cell = tableView.cellForRow(at: indexPath) else { return }
@@ -254,14 +298,6 @@ extension NewsFeedScreenController: UITableViewDelegate {
         }
     }
     
-    func animateFor(_ cell: UITableViewCell) {
-        
-        cell.frame = CGRect(x: cell.frame.origin.x, y: cell.frame.origin.y, width: cell.bounds.width, height: cell.bounds.height)
-        UIView.animate(withDuration: 2.0) {
-            
-        }
-    }
-    
     // Hide or show DownloadButton
     
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
@@ -276,9 +312,10 @@ extension NewsFeedScreenController: UITableViewDelegate {
 // MARK: - UITableViewDataSource
 
 extension NewsFeedScreenController: UITableViewDataSource {
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
 //        return ServiceAPI.shared.getNews().prefix(numberOfNews + dowmloadCounter).count
-        return storageManager.getNumberOfElements()
+        return StorageManager.shared.getNumberOfElements()
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {

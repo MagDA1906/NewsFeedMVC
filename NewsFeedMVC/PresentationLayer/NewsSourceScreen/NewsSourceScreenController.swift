@@ -20,9 +20,6 @@ class NewsSourceScreenController: UIViewController {
     
     var resourceURL: String?
     
-    typealias Viewed = (Bool?) -> ()
-    var newsViewed: Viewed?
-    
     // MARK: - Life cycle
     
     override func viewWillAppear(_ animated: Bool) {
@@ -43,8 +40,6 @@ class NewsSourceScreenController: UIViewController {
         webView.navigationDelegate = self
         
         sendRequest()
-        
-        newsViewed?(true)
     }
 }
 
@@ -55,7 +50,7 @@ private extension NewsSourceScreenController {
         navigationItem.hidesBackButton = false
         
         navigationController?.setNavigationBarHidden(false, animated: true)
-        navigationController?.navigationBar.barTintColor = SourceColors.commonBackgroundColor
+        navigationController?.navigationBar.barTintColor = SourceColors.labelRedColor
         navigationController?.navigationBar.tintColor = UIColor.white
         navigationController?.navigationBar.isTranslucent = false
         

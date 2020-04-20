@@ -59,6 +59,7 @@ class RSSService: NSObject, RSSServiceProtocol {
                 completion(news)
             } else {
                 completion([])
+                print("Bad connection!")
             }
         }
     }
