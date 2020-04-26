@@ -48,22 +48,14 @@ class NewsParser: NSObject, NewsParserProtocol {
                         self.models.append(self.newsModel)
                         itemNumber += 1
                     }
+                    
                     let uniqueModels = self.models.removingDuplicates()
-                    
-                    //                print("News resource: \(uniqueModels[0].newsResource)")
-                    //                print("News link: \(uniqueModels[0].newsLink)")
-                    //                print("News title: \(uniqueModels[0].newsTitle)")
-                    //                print("News description: \(uniqueModels[0].newsDescription)")
-                    //                print("News imageURL: \(uniqueModels[0].imageURL)")
-                    //                print("News date: \(uniqueModels[0].dateOfCreation)")
-                    //                print("News category: \(uniqueModels[0].category)")
-                    
                     completion(uniqueModels)
                 }
 
             case let .failure(error):
-                print("Handling ERROR: \(error.localizedDescription)")
                 
+                print("Handling ERROR: \(error.localizedDescription)")
                 completion([])
             }
         }

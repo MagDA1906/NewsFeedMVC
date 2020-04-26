@@ -49,8 +49,6 @@ extension DefaultNewsTableViewCell {
     
     func setupWithModel(_ model: NewsModel) {
         
-        print("Model Date: \(model.dateOfCreation)")
-        
         titleLabel.text = model.newsTitle
         descriptionLabel.text = model.newsDescription
         resourceLabel.text = model.newsResource

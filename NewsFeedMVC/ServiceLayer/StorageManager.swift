@@ -22,6 +22,8 @@ protocol StorageManagerProtocol {
     func getNumberOfElements() -> Int
     // set news property isViewed to true
     func setModelToViewedState(by indexPath: IndexPath)
+    // remove all models
+    func removeAll()
 }
 
 class StorageManager: StorageManagerProtocol {
@@ -65,6 +67,10 @@ class StorageManager: StorageManagerProtocol {
     
     func setModelToViewedState(by indexPath: IndexPath) {
         models[indexPath.row].isViewed = true
+    }
+    
+    func removeAll() {
+        models.removeAll()
     }
     
     deinit {

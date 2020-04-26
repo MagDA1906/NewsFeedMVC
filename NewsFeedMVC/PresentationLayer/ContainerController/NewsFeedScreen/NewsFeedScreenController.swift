@@ -7,7 +7,6 @@
 //
 
 import UIKit
-import SystemConfiguration
 
 protocol NewsFeedScreenControllerProtocol {
     var dowmloadCounter: Int { get set }
@@ -75,6 +74,16 @@ class NewsFeedScreenController: UIViewController, NewsFeedScreenControllerProtoc
         addTapGestureRecognizer()
         configureTableView()
         configureSearchBar()
+        
+//        if !NetStatus.shared.isMonitoring {
+//            NetStatus.shared.startMonitoring()
+//        }
+//        print(NetStatus.shared.isConnected ? "Connected" : "Not connected")
+//        
+//        NetStatus.shared.didStartMonitoringHandler = {
+//            print("didStartMonitoringHandler")
+//        }
+        
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -87,10 +96,14 @@ class NewsFeedScreenController: UIViewController, NewsFeedScreenControllerProtoc
 // MARK: - Public Functions
 
 extension NewsFeedScreenController {
+    
     // use in MenuViewController (delegate)
     func updateTableView() {
+        
         tableView.reloadData()
-        tableView.scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: true)
+        if !StorageManager.shared.models.isEmpty {
+            tableView.scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: true)
+        }
     }
 }
 
@@ -99,13 +112,14 @@ extension NewsFeedScreenController {
 private extension NewsFeedScreenController {
     
     func fetchNews() {
+        
         rssService.fetchNews { [weak self] (models) in
             guard let self = self else { return }
             DispatchQueue.main.async {
-                StorageManager.shared.save(data: models, by: .AllNews)
                 if models.isEmpty {
                     self.showAlert()
                 }
+                StorageManager.shared.save(data: models, by: .AllNews)
                 self.tableView.reloadData()
             }
         }
@@ -235,7 +249,7 @@ private extension NewsFeedScreenController {
     func showAlert() {
 
         let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
-        
+        // open settings screen
         let settingsAction = UIAlertAction(title: "Settings", style: .default) { (action) in
             guard let settingsURL = URL(string: UIApplication.openSettingsURLString) else { return }
             
@@ -246,7 +260,9 @@ private extension NewsFeedScreenController {
             }
         }
 
-        let alert = UIAlertController(title: "No internet connection", message: "Check your internet connection using Settings button, or press OK", preferredStyle: .alert)
+        let alert = UIAlertController(title: "No internet connection",
+                                      message: "Check your internet connection using Settings button, or press OK",
+                                      preferredStyle: .alert)
         alert.addAction(cancelAction)
         alert.addAction(settingsAction)
 

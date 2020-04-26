@@ -51,7 +51,7 @@ private extension MenuViewController {
         
         tableView.separatorStyle = .none
         tableView.rowHeight = 60
-        tableView.backgroundColor = SourceColors.commonLightBlueColor
+        tableView.backgroundColor = UIColor.darkGray
         tableView.contentInset = UIEdgeInsets.init(top: 0, left: 0, bottom: 90, right: 0)
         
         // tableView constraints
@@ -84,7 +84,7 @@ private extension MenuViewController {
     
     func updateSelectedCellBackgroundView(_ cell: UITableViewCell) {
         let customView = UIView()
-        customView.backgroundColor = SourceColors.commonBackgroundColor
+        customView.backgroundColor = UIColor.lightGray
         cell.selectedBackgroundView = customView
     }
     
@@ -93,25 +93,14 @@ private extension MenuViewController {
         tableView.selectRow(at: indexPath, animated: false, scrollPosition: .none)
     }
     
-    // MARK: - Delay before menu controller will collapse
-    
-    func startTimer() {
-        if timer == nil {
-            timer = Timer.scheduledTimer(timeInterval: 0.3, target: self, selector: #selector(collapseMenu), userInfo: nil, repeats: false)
-        }
-    }
-    
-    @objc func collapseMenu() {
-        delegate?.shouldMoveBackController()
-        timer?.invalidate()
-        timer = nil
-    }
-    
     // fetch news using selected category
     func fetchNews(using category: MenuModel) {
-        rssService.fetchNews { models in
+        
+        rssService.fetchNews { [weak self] models in
+            guard let self = self else { return }
             DispatchQueue.main.async {
                 StorageManager.shared.save(data: models, by: category)
+               self.delegate?.shouldMoveBackController()
             }
         }
     }
@@ -139,8 +128,6 @@ extension MenuViewController: UITableViewDelegate {
             fetchNews(using: menuModel)
             categoryName = menuModel.description
         }
-        startTimer()
-        
     }
 }
 
