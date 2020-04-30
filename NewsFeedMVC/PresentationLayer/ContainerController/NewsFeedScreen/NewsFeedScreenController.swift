@@ -70,19 +70,23 @@ class NewsFeedScreenController: UIViewController, NewsFeedScreenControllerProtoc
         super.viewDidLoad()
         print("NewsFeedScreenController is load")
         
+//        startMonitoringNetStatus()
         fetchNews()
         addTapGestureRecognizer()
         configureTableView()
         configureSearchBar()
         
-//        if !NetStatus.shared.isMonitoring {
-//            NetStatus.shared.startMonitoring()
-//        }
-//        print(NetStatus.shared.isConnected ? "Connected" : "Not connected")
-//        
-//        NetStatus.shared.didStartMonitoringHandler = {
-//            print("didStartMonitoringHandler")
-//        }
+        
+        
+        
+        if !NetStatus.shared.isMonitoring {
+            NetStatus.shared.startMonitoring()
+        }
+        print(NetStatus.shared.isConnected ? "Connected" : "Not connected")
+        
+        NetStatus.shared.didStartMonitoringHandler = {
+            print("didStartMonitoringHandler")
+        }
         
     }
     
@@ -110,6 +114,28 @@ extension NewsFeedScreenController {
 // MARK: - Private Functions
 
 private extension NewsFeedScreenController {
+    
+//    func startMonitoringNetStatus() {
+//
+//        if !NetStatus.shared.isMonitoring {
+//            NetStatus.shared.startMonitoring()
+//        }
+//
+//        print(NetStatus.shared.isConnected ? "Connected" : "Not connected")
+//
+//        if NetStatus.shared.isConnected {
+//            fetchNews()
+//        } else {
+//            showAlert()
+//        }
+////        NetStatus.shared.didStartMonitoringHandler = { [unowned self] in
+////            if NetStatus.shared.isConnected {
+////                self.fetchNews()
+////            } else {
+////                self.showAlert()
+////            }
+////        }
+//    }
     
     func fetchNews() {
         
@@ -180,6 +206,7 @@ private extension NewsFeedScreenController {
         tableView.dataSource  = self
         
         tableView.separatorColor = .clear
+        tableView.backgroundColor = .white
         
         configureFooterView()
         

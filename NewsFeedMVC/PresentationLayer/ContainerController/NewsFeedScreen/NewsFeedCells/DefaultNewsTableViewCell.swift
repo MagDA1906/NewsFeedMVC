@@ -78,6 +78,7 @@ private extension DefaultNewsTableViewCell {
         configureLabels()
         configureView()
         configureImageView()
+        self.contentView.backgroundColor = UIColor.white
     }
     
     func configureLabels() {

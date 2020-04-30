@@ -92,6 +92,7 @@ private extension ExtendedNewsTableViewCell {
         configureView()
         configureImageView()
         configureViewForTap()
+        self.contentView.backgroundColor = UIColor.white
     }
     
     func configureLabels() {

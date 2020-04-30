@@ -91,6 +91,7 @@ private extension ContainerViewController {
     func configureNewsFeedController() {
         let newsFeedController = NewsFeedScreenController()
         controller = newsFeedController
+        controller.view.frame = view.frame
         view.addSubview(controller.view)
         addChild(controller)
         
