@@ -70,29 +70,19 @@ class NewsFeedScreenController: UIViewController, NewsFeedScreenControllerProtoc
         super.viewDidLoad()
         print("NewsFeedScreenController is load")
         
-//        startMonitoringNetStatus()
-        fetchNews()
         addTapGestureRecognizer()
         configureTableView()
         configureSearchBar()
-        
-        
-        
-        
-        if !NetStatus.shared.isMonitoring {
-            NetStatus.shared.startMonitoring()
-        }
-        print(NetStatus.shared.isConnected ? "Connected" : "Not connected")
-        
-        NetStatus.shared.didStartMonitoringHandler = {
-            print("didStartMonitoringHandler")
-        }
-        
+        checkConnection()
+
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         print("NewsFeedScreenController reload table view!")
+        
+        startMonitoringNetStatus()
+
         tableView.reloadData()
     }
 }
@@ -115,36 +105,30 @@ extension NewsFeedScreenController {
 
 private extension NewsFeedScreenController {
     
-//    func startMonitoringNetStatus() {
-//
-//        if !NetStatus.shared.isMonitoring {
-//            NetStatus.shared.startMonitoring()
-//        }
-//
-//        print(NetStatus.shared.isConnected ? "Connected" : "Not connected")
-//
-//        if NetStatus.shared.isConnected {
-//            fetchNews()
-//        } else {
-//            showAlert()
-//        }
-////        NetStatus.shared.didStartMonitoringHandler = { [unowned self] in
-////            if NetStatus.shared.isConnected {
-////                self.fetchNews()
-////            } else {
-////                self.showAlert()
-////            }
-////        }
-//    }
+    func startMonitoringNetStatus() {
+
+        if !NetStatus.shared.isMonitoring {
+            NetStatus.shared.startMonitoring()
+        }
+    }
+
+    func checkConnection() {
+        
+        NetStatus.shared.netStatusChangeHandler = { [unowned self] in
+
+            if StorageManager.shared.models.isEmpty {
+                if NetStatus.shared.isMonitoring, NetStatus.shared.isConnected {
+                    self.fetchNews()
+                }
+            }
+        }
+    }
     
     func fetchNews() {
         
         rssService.fetchNews { [weak self] (models) in
             guard let self = self else { return }
             DispatchQueue.main.async {
-                if models.isEmpty {
-                    self.showAlert()
-                }
                 StorageManager.shared.save(data: models, by: .AllNews)
                 self.tableView.reloadData()
             }

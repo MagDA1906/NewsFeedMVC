@@ -19,8 +19,6 @@ protocol NewsParserProtocol {
 
 class NewsParser: NSObject, NewsParserProtocol {
     
-    
-    
     private var newsModel: NewsModel!
     private var models = [NewsModel]()
     

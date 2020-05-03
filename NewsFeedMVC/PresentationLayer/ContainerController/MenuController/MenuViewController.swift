@@ -37,6 +37,8 @@ class MenuViewController: UIViewController {
 
 private extension MenuViewController {
     
+    // MARK: - Configure TableView
+    
     func configureTableView() {
         
         tableView = UITableView()
@@ -125,7 +127,20 @@ extension MenuViewController: UITableViewDelegate {
             print("Settings is tapped")
             AppCoordinator.shared.goToSettingsScreenController(from: self)
         } else {
+            
+//            if NetStatus.shared.isMonitoring, NetStatus.shared.isConnected {
+//                fetchNews(using: menuModel)
+//            }
+            
             fetchNews(using: menuModel)
+            
+            NetStatus.shared.netStatusChangeHandler = { [unowned self] in
+                if NetStatus.shared.isMonitoring, NetStatus.shared.isConnected {
+                    self.fetchNews(using: menuModel)
+                }
+            }
+            
+//            fetchNews(using: menuModel)
             categoryName = menuModel.description
         }
     }
