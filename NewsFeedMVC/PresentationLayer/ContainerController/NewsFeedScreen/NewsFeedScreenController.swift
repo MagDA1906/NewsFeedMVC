@@ -12,7 +12,18 @@ protocol NewsFeedScreenControllerProtocol {
     var dowmloadCounter: Int { get set }
 }
 
-class NewsFeedScreenController: UIViewController, NewsFeedScreenControllerProtocol {
+protocol NewsFeedScreenControllerDelegate: class {
+    
+    var category: MenuModel? { get set }
+    
+    func didStartSpinner()
+    func didStopSpinner()
+    func reloadTableView()
+    func fetchNews(using category: MenuModel)
+    
+}
+
+class NewsFeedScreenController: UIViewController {
     
     // MARK: - IBOutlets
     
@@ -42,10 +53,12 @@ class NewsFeedScreenController: UIViewController, NewsFeedScreenControllerProtoc
     
     // MARK: - Private Properties
     
+    private var spinner: UIActivityIndicatorView!
     private var currentIndexPath: IndexPath?
     private var oldIndexPath: IndexPath?
     private var state: State = .collapsed
     private var numberOfNews = 10
+    private var newsCategory: MenuModel?
     
     private let downloadButton: UIButton = {
         let button = UIButton(type: .custom)
@@ -64,7 +77,31 @@ class NewsFeedScreenController: UIViewController, NewsFeedScreenControllerProtoc
         return view
     }()
     
+    private let refreshControl: UIRefreshControl = {
+        let refreshControl = UIRefreshControl()
+        refreshControl.addTarget(self, action: #selector(refresh(sender:)), for: .valueChanged)
+        return refreshControl
+    }()
+    
     // MARK: - Life Cycle
+    
+    var menuController: MenuViewController?
+    
+    init() {
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    convenience init(controller: MenuViewController) {
+        self.init()
+        self.menuController = controller
+        
+        guard let menuController = menuController else { return }
+        menuController.NFCdelegate = self
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -73,8 +110,9 @@ class NewsFeedScreenController: UIViewController, NewsFeedScreenControllerProtoc
         addTapGestureRecognizer()
         configureTableView()
         configureSearchBar()
+        configureSpinner()
+        
         checkConnection()
-
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -90,6 +128,16 @@ class NewsFeedScreenController: UIViewController, NewsFeedScreenControllerProtoc
 // MARK: - Public Functions
 
 extension NewsFeedScreenController {
+    
+    // Added refresh control function for update data
+    @objc func refresh(sender: UIRefreshControl) {
+        if NetStatus.shared.isConnected {
+            let category = newsCategory ?? MenuModel.AllNews
+            print("\(category.description)")
+            fetchNews(using: category)
+        }
+        sender.endRefreshing()
+    }
     
     // use in MenuViewController (delegate)
     func updateTableView() {
@@ -113,9 +161,9 @@ private extension NewsFeedScreenController {
     }
 
     func checkConnection() {
-        
+        // will launched one time
+        spinner.startAnimating()
         NetStatus.shared.netStatusChangeHandler = { [unowned self] in
-
             if StorageManager.shared.models.isEmpty {
                 if NetStatus.shared.isMonitoring, NetStatus.shared.isConnected {
                     self.fetchNews()
@@ -125,12 +173,19 @@ private extension NewsFeedScreenController {
     }
     
     func fetchNews() {
-        
-        rssService.fetchNews { [weak self] (models) in
+
+        rssService.fetchNews { [weak self] (models, error) in
             guard let self = self else { return }
+            if error != nil {
+                print("Bad enternet connection..")
+            }
+            
+            guard let models = models else { return }
+            
             DispatchQueue.main.async {
                 StorageManager.shared.save(data: models, by: .AllNews)
                 self.tableView.reloadData()
+                self.spinner.stopAnimating()
             }
         }
     }
@@ -192,10 +247,25 @@ private extension NewsFeedScreenController {
         tableView.separatorColor = .clear
         tableView.backgroundColor = .white
         
+        tableView.refreshControl = refreshControl
+        
         configureFooterView()
         
     }
     
+    func configureSpinner() {
+        
+        spinner = UIActivityIndicatorView()
+        spinner.style = .whiteLarge
+        spinner.color = UIColor.darkGray
+        spinner.translatesAutoresizingMaskIntoConstraints = false
+        tableView.addSubview(spinner)
+
+
+        // spinner constraints
+        spinner.centerYAnchor.constraint(equalTo: tableView.centerYAnchor).isActive = true
+        spinner.centerXAnchor.constraint(equalTo: tableView.centerXAnchor).isActive = true
+    }
     // MARK: - Create DefaultNewsTableViewCell
     
     func defaultCellForIndexPath(_ indexPath: IndexPath) -> UITableViewCell {
@@ -256,29 +326,6 @@ private extension NewsFeedScreenController {
         
         searchbar.barTintColor = SourceColors.labelRedColor
     }
-    
-    func showAlert() {
-
-        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
-        // open settings screen
-        let settingsAction = UIAlertAction(title: "Settings", style: .default) { (action) in
-            guard let settingsURL = URL(string: UIApplication.openSettingsURLString) else { return }
-            
-            if UIApplication.shared.canOpenURL(settingsURL) {
-                UIApplication.shared.open(settingsURL, completionHandler: { (success) in
-                    print("Settings opened: \(success)")
-                })
-            }
-        }
-
-        let alert = UIAlertController(title: "No internet connection",
-                                      message: "Check your internet connection using Settings button, or press OK",
-                                      preferredStyle: .alert)
-        alert.addAction(cancelAction)
-        alert.addAction(settingsAction)
-
-        self.present(alert, animated: true)
-    }
 }
 
 // MARK: - UITableViewDelegate
@@ -327,13 +374,13 @@ extension NewsFeedScreenController: UITableViewDelegate {
     
     // Hide or show DownloadButton
     
-    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        if (ServiceAPI.shared.getNews().count - dowmloadCounter) > numberOfNews  {
-            downloadButton.isHidden = false
-        } else {
-            downloadButton.isHidden = true
-        }
-    }
+//    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+//        if (ServiceAPI.shared.getNews().count - dowmloadCounter) > numberOfNews  {
+//            downloadButton.isHidden = false
+//        } else {
+//            downloadButton.isHidden = true
+//        }
+//    }
 }
 
 // MARK: - UITableViewDataSource
@@ -360,4 +407,50 @@ extension NewsFeedScreenController: UITableViewDataSource {
         
         return defaultCellForIndexPath(indexPath)
     }
+}
+
+// MARK: - NewsFeedScreenControllerDelegate
+
+extension NewsFeedScreenController: NewsFeedScreenControllerDelegate {
+    var category: MenuModel? {
+        get {
+            return newsCategory
+        }
+        set {
+            newsCategory = newValue
+        }
+    }
+    
+    func didStartSpinner() {
+        spinner.startAnimating()
+        self.view.bringSubviewToFront(spinner)
+        print("Spinner is animating = \(spinner.isAnimating)")
+    }
+    
+    func didStopSpinner() {
+        spinner.stopAnimating()
+        print("Spinner is animating = \(spinner.isAnimating)")
+    }
+    // TODO: If one of the cell is expanded it is should be colapsed
+    func reloadTableView() {
+        tableView.reloadData()
+        if !StorageManager.shared.models.isEmpty {
+            tableView.scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: true)
+        }
+    }
+    
+    func fetchNews(using category: MenuModel) {
+        rssService.fetchNews { [weak self] (models, error) in
+            guard let self = self else { return }
+            
+            guard let models = models else { return }
+            DispatchQueue.main.async {
+                StorageManager.shared.save(data: models, by: category)
+                self.reloadTableView()
+                self.didStopSpinner()
+            }
+        }
+    }
+    
+    
 }

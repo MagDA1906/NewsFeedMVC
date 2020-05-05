@@ -36,13 +36,13 @@ class ContainerViewController: UIViewController, ContainerViewControllerDelegate
         print("ContainerViewController is created!")
         
         addSettingsBarButton()
+        configureMenuController() // temp
         configureNewsFeedController()
     }
     
     func shouldMoveBackController() {
         if let vc = self.controller as? NewsFeedScreenController {
             vc.dowmloadCounter = 0
-            vc.updateTableView()
         }
         if let vc = self.menuController as? MenuViewController {
             self.categoryName = vc.categoryName
@@ -87,9 +87,10 @@ private extension ContainerViewController {
     }
     
     // MARK: - Initialized NewsFeedScreenController
-    
+    // configure NewsFeedController with MenuViewController as a parameter
     func configureNewsFeedController() {
-        let newsFeedController = NewsFeedScreenController()
+        guard let menuController = menuController as? MenuViewController else { return }
+        let newsFeedController = NewsFeedScreenController(controller: menuController)
         controller = newsFeedController
         controller.view.frame = view.frame
         view.addSubview(controller.view)
@@ -145,7 +146,6 @@ private extension ContainerViewController {
     // MARK: - Create switched menu
     
     func toggleMenu() {
-        configureMenuController()
         isMove = !isMove
         showMenuViewController(shouldMove: isMove)
     }

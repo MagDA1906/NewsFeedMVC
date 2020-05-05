@@ -15,13 +15,13 @@ class MenuViewController: UIViewController {
     private let rssService = RSSService()
     
     private var tableView: UITableView!
-    private var timer: Timer?
     
     // MARK: - Public Properties
     
     var categoryName = ""
     
     weak var delegate: ContainerViewControllerDelegate?
+    weak var NFCdelegate: NewsFeedScreenControllerDelegate?
     
     // MARK: - Life Cycle
 
@@ -94,18 +94,6 @@ private extension MenuViewController {
         let indexPath = IndexPath(row: 0, section: 0)
         tableView.selectRow(at: indexPath, animated: false, scrollPosition: .none)
     }
-    
-    // fetch news using selected category
-    func fetchNews(using category: MenuModel) {
-        
-        rssService.fetchNews { [weak self] models in
-            guard let self = self else { return }
-            DispatchQueue.main.async {
-                StorageManager.shared.save(data: models, by: category)
-               self.delegate?.shouldMoveBackController()
-            }
-        }
-    }
 }
 
 // MARK: - UITableViewDelegate
@@ -124,24 +112,31 @@ extension MenuViewController: UITableViewDelegate {
         }
         if menuModel == MenuModel.Settings {
             tableView.deselectRow(at: indexPath, animated: true)
-            print("Settings is tapped")
             AppCoordinator.shared.goToSettingsScreenController(from: self)
         } else {
-            
-//            if NetStatus.shared.isMonitoring, NetStatus.shared.isConnected {
-//                fetchNews(using: menuModel)
-//            }
-            
-            fetchNews(using: menuModel)
-            
-            NetStatus.shared.netStatusChangeHandler = { [unowned self] in
-                if NetStatus.shared.isMonitoring, NetStatus.shared.isConnected {
-                    self.fetchNews(using: menuModel)
+            if NetStatus.shared.isConnected {
+                categoryName = menuModel.description
+                self.NFCdelegate?.category = menuModel
+                self.NFCdelegate?.fetchNews(using: menuModel)
+                self.delegate?.shouldMoveBackController()
+                self.NFCdelegate?.didStartSpinner()
+            } else {
+                categoryName = menuModel.description
+                StorageManager.shared.removeAll()
+                DispatchQueue.main.async {
+                    self.delegate?.shouldMoveBackController()
+                    self.NFCdelegate?.reloadTableView()
+                    self.NFCdelegate?.didStartSpinner()
                 }
             }
             
-//            fetchNews(using: menuModel)
-            categoryName = menuModel.description
+            if StorageManager.shared.models.isEmpty {
+                NetStatus.shared.netStatusChangeHandler = { [unowned self] in
+                    if NetStatus.shared.isMonitoring, NetStatus.shared.isConnected {
+                        self.NFCdelegate?.fetchNews(using: menuModel)
+                    }
+                }
+            }
         }
     }
 }

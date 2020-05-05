@@ -11,5 +11,5 @@ import Foundation
 protocol RSSServiceProtocol {
     
 //    func fetchNews(_ complition: @escaping ([NewsModel]) -> ())
-    func fetchNews(_ complition: @escaping ([NewsModel]) -> ())
+    func fetchNews(_ complition: @escaping ([NewsModel]?, _ error: Error?) -> ())
 }

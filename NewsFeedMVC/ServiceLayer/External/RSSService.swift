@@ -17,16 +17,24 @@ class RSSService: NSObject, RSSServiceProtocol {
     
     // MARK: - News
     
-    private var lentaNews  = [NewsModel]()
-    private var gazetaNews = [NewsModel]()
+//    private var lentaNews  = [NewsModel]()
+//    private var gazetaNews = [NewsModel]()
     
-    private var feedNews: [NewsModel] {
-        return lentaNews + gazetaNews
+    private var lentaNews: [NewsModel]?
+    private var gazetaNews: [NewsModel]?
+    
+    private var feedNews: [NewsModel]? {
+        if lentaNews != nil, gazetaNews != nil {
+            return lentaNews! + gazetaNews!
+        }
+        return nil
     }
+    
+    private var error: Error?
     
     // MARK: - RSSService
     
-    func fetchNews(_ completion: @escaping ([NewsModel]) -> ()) {
+    func fetchNews(_ completion: @escaping ([NewsModel]?, _ error: Error?) -> ()) {
         
         let dispatchGroup = DispatchGroup()
         
@@ -34,8 +42,13 @@ class RSSService: NSObject, RSSServiceProtocol {
         if let lentaURL = urlLentaRu {
             let lentaWorkItem = DispatchWorkItem { [weak self] in
                 let newsParser: NewsParserProtocol = NewsParser()
-                newsParser.fetchNewsAtUrl(lentaURL) { (news) in
-                    self?.lentaNews = news
+                newsParser.fetchNewsAtUrl(lentaURL) { (news, error) in
+                    if let news = news {
+                        self?.lentaNews = news
+                    }
+                    if let error = error {
+                        self?.error = error
+                    }
                     dispatchGroup.leave()
                 }
             }
@@ -46,8 +59,13 @@ class RSSService: NSObject, RSSServiceProtocol {
         if let gazetaUrl = urlGazetaRu {
             let gazetaWorkItem = DispatchWorkItem { [weak self] in
                 let newsParser: NewsParserProtocol = NewsParser()
-                newsParser.fetchNewsAtUrl(gazetaUrl) { (news) in
-                    self?.gazetaNews = news
+                newsParser.fetchNewsAtUrl(gazetaUrl) { (news, error) in
+                    if let gazetaNews = news {
+                        self?.gazetaNews = gazetaNews
+                    }
+                    if let error = error {
+                        self?.error = error
+                    }
                     dispatchGroup.leave()
                 }
             }
@@ -55,10 +73,11 @@ class RSSService: NSObject, RSSServiceProtocol {
         }
         
         dispatchGroup.notify(queue: .global()) { [weak self] in
-            if let news = self?.feedNews {
-                completion(news)
+            guard let self = self else { return }
+            if let news = self.feedNews {
+                completion(news, nil)
             } else {
-                completion([])
+                completion(nil, self.error)
                 print("Bad connection!")
             }
         }

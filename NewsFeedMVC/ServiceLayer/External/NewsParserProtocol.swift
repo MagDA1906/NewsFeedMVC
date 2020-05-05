@@ -10,7 +10,7 @@ import Foundation
 import Alamofire
 import SwiftyXMLParser
 
-typealias NetworkCompletion = (_ models: [NewsModel]) -> ()
+typealias NetworkCompletion = (_ models: [NewsModel]?, _ error: Error?) -> ()
 
 protocol NewsParserProtocol {
     func fetchNewsAtUrl(_ url: URL, completion: @escaping NetworkCompletion)
@@ -48,13 +48,13 @@ class NewsParser: NSObject, NewsParserProtocol {
                     }
                     
                     let uniqueModels = self.models.removingDuplicates()
-                    completion(uniqueModels)
+                    completion(uniqueModels, nil)
                 }
 
             case let .failure(error):
                 
                 print("Handling ERROR: \(error.localizedDescription)")
-                completion([])
+                completion(nil, error)
             }
         }
     }
