@@ -36,14 +36,12 @@ class ContainerViewController: UIViewController, ContainerViewControllerDelegate
         print("ContainerViewController is created!")
         
         addSettingsBarButton()
-        configureMenuController() // temp
+        configureMenuController()
         configureNewsFeedController()
     }
     
     func shouldMoveBackController() {
-        if let vc = self.controller as? NewsFeedScreenController {
-            vc.dowmloadCounter = 0
-        }
+
         if let vc = self.menuController as? MenuViewController {
             self.categoryName = vc.categoryName
             self.navigationItem.title = vc.categoryName

@@ -8,10 +8,6 @@
 
 import UIKit
 
-protocol NewsFeedScreenControllerProtocol {
-    var dowmloadCounter: Int { get set }
-}
-
 protocol NewsFeedScreenControllerDelegate: class {
     
     var category: MenuModel? { get set }
@@ -47,10 +43,6 @@ class NewsFeedScreenController: UIViewController {
         }
     }
     
-    // MARK: - Public Properties
-    
-    var dowmloadCounter = 0
-    
     // MARK: - Private Properties
     
     private var spinner: UIActivityIndicatorView!
@@ -59,6 +51,8 @@ class NewsFeedScreenController: UIViewController {
     private var state: State = .collapsed
     private var numberOfNews = 10
     private var newsCategory: MenuModel?
+    
+    // MARK: - Closures
     
     private let downloadButton: UIButton = {
         let button = UIButton(type: .custom)
@@ -69,12 +63,6 @@ class NewsFeedScreenController: UIViewController {
         button.isHidden = true
         
         return button
-    }()
-    
-    private let footerView: UIView = {
-        let view = UIView(frame: CGRect(x: 0, y: 0, width: 50, height: 50))
-        view.backgroundColor = UIColor.clear
-        return view
     }()
     
     private let refreshControl: UIRefreshControl = {
@@ -125,33 +113,11 @@ class NewsFeedScreenController: UIViewController {
     }
 }
 
-// MARK: - Public Functions
-
-extension NewsFeedScreenController {
-    
-    // Added refresh control function for update data
-    @objc func refresh(sender: UIRefreshControl) {
-        if NetStatus.shared.isConnected {
-            let category = newsCategory ?? MenuModel.AllNews
-            print("\(category.description)")
-            fetchNews(using: category)
-        }
-        sender.endRefreshing()
-    }
-    
-    // use in MenuViewController (delegate)
-    func updateTableView() {
-        
-        tableView.reloadData()
-        if !StorageManager.shared.models.isEmpty {
-            tableView.scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: true)
-        }
-    }
-}
-
 // MARK: - Private Functions
 
 private extension NewsFeedScreenController {
+    
+    // MARK: - Start monitoring internet connection
     
     func startMonitoringNetStatus() {
 
@@ -160,35 +126,20 @@ private extension NewsFeedScreenController {
         }
     }
 
+    // If app launched without internet connection, we should monitoring connection and if connection is successed reload data
     func checkConnection() {
         // will launched one time
         spinner.startAnimating()
         NetStatus.shared.netStatusChangeHandler = { [unowned self] in
             if StorageManager.shared.models.isEmpty {
                 if NetStatus.shared.isMonitoring, NetStatus.shared.isConnected {
-                    self.fetchNews()
+                    self.fetchNews(using: .AllNews)
                 }
             }
         }
     }
     
-    func fetchNews() {
-
-        rssService.fetchNews { [weak self] (models, error) in
-            guard let self = self else { return }
-            if error != nil {
-                print("Bad enternet connection..")
-            }
-            
-            guard let models = models else { return }
-            
-            DispatchQueue.main.async {
-                StorageManager.shared.save(data: models, by: .AllNews)
-                self.tableView.reloadData()
-                self.spinner.stopAnimating()
-            }
-        }
-    }
+    // MARK: - GestureRecognizer
     
     func addTapGestureRecognizer() {
         
@@ -227,6 +178,18 @@ private extension NewsFeedScreenController {
         }
     }
     
+    // Added refresh control function for update data
+    @objc func refresh(sender: UIRefreshControl) {
+        if NetStatus.shared.isConnected {
+            let category = newsCategory ?? MenuModel.AllNews
+            print("\(category.description)")
+            fetchNews(using: category)
+        }
+        sender.endRefreshing()
+    }
+    
+    // MARK: - Configure TableView
+    
     func configureTableView() {
         
         let defaultCellReuseID  = DefaultNewsTableViewCell.nibName
@@ -249,9 +212,9 @@ private extension NewsFeedScreenController {
         
         tableView.refreshControl = refreshControl
         
-        configureFooterView()
-        
     }
+    
+    // MARK: - Configure Spinner
     
     func configureSpinner() {
         
@@ -266,6 +229,7 @@ private extension NewsFeedScreenController {
         spinner.centerYAnchor.constraint(equalTo: tableView.centerYAnchor).isActive = true
         spinner.centerXAnchor.constraint(equalTo: tableView.centerXAnchor).isActive = true
     }
+    
     // MARK: - Create DefaultNewsTableViewCell
     
     func defaultCellForIndexPath(_ indexPath: IndexPath) -> UITableViewCell {
@@ -286,38 +250,6 @@ private extension NewsFeedScreenController {
         }
         extendedCell.setupWithModel(StorageManager.shared.getModel(by: indexPath))
         return extendedCell
-    }
-    
-    // MARK: - Configure FooterView
-    
-    func configureFooterView() {
-        footerView.addSubview(downloadButton)
-        downloadButton.addTarget(self, action: #selector(actionFooterButton), for: UIControl.Event.touchUpInside)
-
-        // footerButton constraints
-        downloadButton.centerXAnchor.constraint(equalTo: footerView.centerXAnchor).isActive = true
-        downloadButton.centerYAnchor.constraint(equalTo: footerView.centerYAnchor).isActive = true
-        
-        tableView.tableFooterView = footerView
-    }
-    
-    @objc func actionFooterButton(_ sender: UIButton) {
-        print("Footer button is taped!")
-        dowmloadCounter = dowmloadCounter + numberOfNews
-        tableView.reloadData()
-        aniamteDownloadButton(sender)
-    }
-    
-    // animation FooterButton
-    
-    func aniamteDownloadButton(_ sender: UIButton) {
-        let springAnimation = CASpringAnimation(keyPath: "transform.scale")
-        springAnimation.fromValue = 1
-        springAnimation.toValue = 2
-        springAnimation.duration = 0.06
-        springAnimation.repeatCount = 1
-        springAnimation.autoreverses = true
-        sender.layer.add(springAnimation, forKey: "transform.scale")
     }
     
     // MARK: - Cnfigure UISearchBar
@@ -371,16 +303,6 @@ extension NewsFeedScreenController: UITableViewDelegate {
             }
         }
     }
-    
-    // Hide or show DownloadButton
-    
-//    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-//        if (ServiceAPI.shared.getNews().count - dowmloadCounter) > numberOfNews  {
-//            downloadButton.isHidden = false
-//        } else {
-//            downloadButton.isHidden = true
-//        }
-//    }
 }
 
 // MARK: - UITableViewDataSource
@@ -388,7 +310,6 @@ extension NewsFeedScreenController: UITableViewDelegate {
 extension NewsFeedScreenController: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-//        return ServiceAPI.shared.getNews().prefix(numberOfNews + dowmloadCounter).count
         return StorageManager.shared.getNumberOfElements()
     }
     
@@ -451,6 +372,4 @@ extension NewsFeedScreenController: NewsFeedScreenControllerDelegate {
             }
         }
     }
-    
-    
 }
