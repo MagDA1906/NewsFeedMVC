@@ -40,6 +40,10 @@ class ContainerViewController: UIViewController, ContainerViewControllerDelegate
         configureNewsFeedController()
     }
     
+    deinit {
+        NetStatus.shared.stopMonitoring()
+    }
+    
     func shouldMoveBackController() {
 
         if let vc = self.menuController as? MenuViewController {
@@ -56,6 +60,10 @@ private extension ContainerViewController {
     // MARK: - Configure navigation item
     
     func configureNavigationItem() {
+        
+//        navigationController?.navigationBar.prefersLargeTitles = true
+//        navigationItem.hidesSearchBarWhenScrolling = true
+//        navigationItem.largeTitleDisplayMode = .automatic
         
         navigationItem.hidesBackButton = true
         
@@ -87,14 +95,13 @@ private extension ContainerViewController {
     // MARK: - Initialized NewsFeedScreenController
     // configure NewsFeedController with MenuViewController as a parameter
     func configureNewsFeedController() {
+        
         guard let menuController = menuController as? MenuViewController else { return }
         let newsFeedController = NewsFeedScreenController(controller: menuController)
         controller = newsFeedController
         controller.view.frame = view.frame
         view.addSubview(controller.view)
         addChild(controller)
-        
-    
     }
     
     // MARK: - Initialized MenuViewController

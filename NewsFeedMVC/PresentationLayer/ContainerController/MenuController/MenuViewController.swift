@@ -42,6 +42,7 @@ private extension MenuViewController {
     func configureTableView() {
         
         tableView = UITableView()
+        tableView.translatesAutoresizingMaskIntoConstraints = false
         
         tableView.delegate = self
         tableView.dataSource = self

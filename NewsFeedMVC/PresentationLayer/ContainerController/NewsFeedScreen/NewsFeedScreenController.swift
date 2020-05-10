@@ -25,6 +25,7 @@ class NewsFeedScreenController: UIViewController {
     
     @IBOutlet private weak var tableView: UITableView!
     @IBOutlet private weak var searchbar: UISearchBar!
+
     
     private let rssService = RSSService()
     
@@ -53,17 +54,6 @@ class NewsFeedScreenController: UIViewController {
     private var newsCategory: MenuModel?
     
     // MARK: - Closures
-    
-    private let downloadButton: UIButton = {
-        let button = UIButton(type: .custom)
-        button.setImage(SourceImages.downloadImage, for: .normal)
-        button.translatesAutoresizingMaskIntoConstraints = false
-        button.contentMode = .scaleAspectFit
-        button.clipsToBounds = true
-        button.isHidden = true
-        
-        return button
-    }()
     
     private let refreshControl: UIRefreshControl = {
         let refreshControl = UIRefreshControl()
@@ -94,6 +84,10 @@ class NewsFeedScreenController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         print("NewsFeedScreenController is load")
+        
+//        navigationController?.navigationBar.prefersLargeTitles = true
+//        navigationItem.hidesSearchBarWhenScrolling = true
+//        navigationItem.largeTitleDisplayMode = .automatic
         
         addTapGestureRecognizer()
         configureTableView()
