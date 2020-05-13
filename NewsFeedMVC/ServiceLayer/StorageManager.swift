@@ -24,6 +24,8 @@ protocol StorageManagerProtocol {
     func setModelToViewedState(by indexPath: IndexPath)
     // remove all models
     func removeAll()
+    // filtering models by searching from SearchBar
+    func filteringModels(by searchingString: String)
 }
 
 class StorageManager: StorageManagerProtocol {
@@ -71,6 +73,19 @@ class StorageManager: StorageManagerProtocol {
     
     func removeAll() {
         models.removeAll()
+    }
+    
+    func filteringModels(by searchingString: String) {
+        print("Models count = \(models.count)")
+        var filteringArray = [NewsModel]()
+        for model in models {
+            if model.newsTitle.localizedCaseInsensitiveContains(searchingString) || model.newsDescription.localizedCaseInsensitiveContains(searchingString) {
+                filteringArray.append(model)
+            }
+        }
+        print("filteringArray count = \(filteringArray.count)")
+        models.removeAll()
+        models = filteringArray
     }
     
     deinit {

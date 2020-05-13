@@ -10,7 +10,7 @@
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="NewsFeedScreenController" customModule="NewsFeedMVC" customModuleProvider="target">
             <connections>
-                <outlet property="searchbar" destination="TiA-3A-QZk" id="9Ix-eS-WV2"/>
+                <outlet property="searchBar" destination="TiA-3A-QZk" id="9Ix-eS-WV2"/>
                 <outlet property="tableView" destination="YCy-nL-bVE" id="vMm-wo-XiG"/>
                 <outlet property="view" destination="iN0-l3-epB" id="5YS-sO-1cE"/>
             </connections>

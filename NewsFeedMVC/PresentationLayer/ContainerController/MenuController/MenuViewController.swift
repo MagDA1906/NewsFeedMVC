@@ -118,7 +118,7 @@ extension MenuViewController: UITableViewDelegate {
             if NetStatus.shared.isConnected {
                 categoryName = menuModel.description
                 self.NFCdelegate?.category = menuModel
-                self.NFCdelegate?.fetchNews(using: menuModel)
+                self.NFCdelegate?.fetchNews(using: menuModel, nil)
                 self.delegate?.shouldMoveBackController()
                 self.NFCdelegate?.didStartSpinner()
             } else {
@@ -134,7 +134,7 @@ extension MenuViewController: UITableViewDelegate {
             if StorageManager.shared.models.isEmpty {
                 NetStatus.shared.netStatusChangeHandler = { [unowned self] in
                     if NetStatus.shared.isMonitoring, NetStatus.shared.isConnected {
-                        self.NFCdelegate?.fetchNews(using: menuModel)
+                        self.NFCdelegate?.fetchNews(using: menuModel, nil)
                     }
                 }
             }
