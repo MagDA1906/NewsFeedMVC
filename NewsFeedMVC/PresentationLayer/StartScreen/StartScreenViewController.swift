@@ -25,8 +25,6 @@ class StartScreenViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
-        navigationController?.setNavigationBarHidden(true, animated: true)
 
         animateNewsLabel()
         animateFeedLabel()
@@ -34,6 +32,8 @@ class StartScreenViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        navigationController?.setNavigationBarHidden(true, animated: true)
         
         configureNewsLabel()
         configureFeedLabel()
@@ -72,7 +72,7 @@ private extension StartScreenViewController {
     func configureNewsLabel() {
         
         if let font = UIFont(name: "Rockwell-Bold", size: 48), let text = newsLabel.text {
-            let attributes = setAttributedTextWith(SourceColors.labelBorderColor, SourceColors.labelRedColor, -4.0, font)
+            let attributes = FontConfigurator.setAttributedTextWith(SourceColors.labelBorderColor, SourceColors.labelRedColor, -4.0, font)
             newsLabel.attributedText = NSMutableAttributedString(string: text, attributes: attributes)
         }
         
@@ -88,38 +88,17 @@ private extension StartScreenViewController {
     func configureFeedLabel() {
         
         if let font = UIFont(name: "Times-BoldItalic", size: 36), let text = feedLabel.text {
-            let attributes = setAttributedTextWith(nil, SourceColors.labelPupleColor, nil, font)
+            let attributes = FontConfigurator.setAttributedTextWith(nil, SourceColors.labelPupleColor, nil, font)
             feedLabel.attributedText = NSMutableAttributedString(string: text, attributes: attributes)
         }
         
         feedLabel.alpha = 0.0
     }
     
-    // Supporting method for configure text labels attributes
-    func setAttributedTextWith(_ strokeColor: UIColor?, _ foregroundColor: UIColor?, _ strokeWidth: Float?, _ font: UIFont) -> [NSAttributedString.Key: Any] {
-        
-        var strokeTextAttributes: [NSAttributedString.Key: Any] = [:]
-        
-        if let strokeColor = strokeColor {
-            strokeTextAttributes[NSAttributedString.Key.strokeColor] = strokeColor
-        }
-        
-        if let foregroundColor = foregroundColor {
-            strokeTextAttributes[NSAttributedString.Key.foregroundColor] = foregroundColor
-        }
-        
-        if let strokeWidth = strokeWidth {
-            strokeTextAttributes[NSAttributedString.Key.strokeWidth] = strokeWidth
-        }
-        
-        strokeTextAttributes[NSAttributedString.Key.font] = font
-        
-        return strokeTextAttributes
-    }
-    
     // Animations
     
     func animateNewsLabel() {
+
         UIView.animate(withDuration: 1.0,
                        delay: 0,
                        usingSpringWithDamping: 0.7,
@@ -134,6 +113,7 @@ private extension StartScreenViewController {
     }
     
     func animateFeedLabel() {
+        
         UIView.animate(withDuration: 1.0,
                        delay: 0.5,
                        usingSpringWithDamping: 0.7,

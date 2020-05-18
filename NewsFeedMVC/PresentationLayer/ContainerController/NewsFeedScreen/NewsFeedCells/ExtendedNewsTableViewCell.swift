@@ -18,8 +18,8 @@ class ExtendedNewsTableViewCell: UITableViewCell {
     
     @IBOutlet private weak var newsResourceLabel: UILabel!
     @IBOutlet private weak var newsTitleLabel: UILabel!
-    @IBOutlet private weak var newsDescriptionText: UITextView!
-    @IBOutlet private weak var linkLabel: UILabel!
+    @IBOutlet private weak var newsDescriptionLabel: UILabel!
+    @IBOutlet private weak var dateLabel: UILabel!
     
     @IBOutlet private weak var newsImageView: UIImageView!
     @IBOutlet private weak var backView: UIView!
@@ -38,20 +38,10 @@ class ExtendedNewsTableViewCell: UITableViewCell {
         
         newsResourceLabel.text = ""
         newsTitleLabel.text = ""
-        newsDescriptionText.text = ""
+        newsDescriptionLabel.text = ""
+        dateLabel.text = ""
         newsImageView.image = nil
     }
-    override func awakeFromNib() {
-        super.awakeFromNib()
-        // Initialization code
-    }
-    
-    override func setSelected(_ selected: Bool, animated: Bool) {
-        super.setSelected(selected, animated: animated)
-        
-        // Configure the view for the selected state
-    }
-    
 }
 
 // MARK: - Internal Functions
@@ -64,25 +54,30 @@ extension ExtendedNewsTableViewCell {
     
     func setupWithModel(_ model: NewsModel) {
         
-        linkLabel.text = model.newsLink
+//        linkLabel.text = model.newsLink
         newsResourceLabel.text = getTextSeparatedBySpaceFromModel(model)
         
         newsTitleLabel.text = model.newsTitle
-        newsDescriptionText.text = model.newsDescription
+        newsDescriptionLabel.text = model.newsDescription
+        newsResourceLabel.text = model.newsResource
+        dateLabel.text = model.formattedDate
+        
+        print(newsDescriptionLabel.text!)
         
         // Using SDWebImage Pod
         if model.imageURL.isEmpty {
             newsImageView.image = SourceImages.emptyPhotoImage
+            newsImageView.contentMode = .scaleAspectFit
         } else {
             newsImageView.sd_setImage(with: URL(string: model.imageURL), completed: nil)
         }
         
         if model.isViewed {
             backView.backgroundColor = SourceColors.commonLightGreyColor
-            newsDescriptionText.backgroundColor = SourceColors.commonLightGreyColor
+            newsDescriptionLabel.backgroundColor = SourceColors.commonLightGreyColor
         } else {
             backView.backgroundColor = UIColor.white
-            newsDescriptionText.backgroundColor = UIColor.white
+            newsDescriptionLabel.backgroundColor = UIColor.white
         }
     }
 }
@@ -93,39 +88,48 @@ private extension ExtendedNewsTableViewCell {
     
     func configureSelf() {
         
-        backgroundColor = SourceColors.commonBackgroundColor
-        contentView.frame = contentView.frame.insetBy(dx: 4, dy: 4)
-        
         configureLabels()
-        configureTextView()
         configureView()
+        configureImageView()
+        configureViewForTap()
+        self.contentView.backgroundColor = UIColor.white
     }
     
     func configureLabels() {
         
-        newsResourceLabel.textColor = SourceColors.commonBackgroundColor
-        newsResourceLabel.numberOfLines = 0
+        newsResourceLabel.numberOfLines = 1
         
-        newsTitleLabel.textColor = SourceColors.commonDarkGreyColor
-        newsTitleLabel.numberOfLines = 0
+        newsTitleLabel.textColor = UIColor.white
+        newsTitleLabel.numberOfLines = 3
+        newsDescriptionLabel.numberOfLines = 0
         
-        linkLabel.textColor = SourceColors.commonDarkBlueColor
-        linkLabel.numberOfLines = 0
-    }
-    
-    func configureTextView() {
-        
-        newsDescriptionText.isEditable = false
+        if let font = UIFont(name: "HelveticaNeue-Bold", size: 26), let text = newsTitleLabel.text {
+            let  attributes = FontConfigurator.setAttributedTextWith(SourceColors.labelBorderColor, UIColor.white, -3.0, font)
+            newsTitleLabel.attributedText = NSMutableAttributedString(string: text, attributes: attributes)
+        }
     }
     
     func configureView() {
         
-        backView.layer.borderWidth = 2
-        backView.layer.borderColor = SourceColors.commonLightGreyColor.cgColor
+        backView.layer.borderWidth = 1
+        backView.layer.borderColor = SourceColors.commonDarkGreyColor.cgColor
         backView.layer.cornerRadius = 8
         backView.layer.masksToBounds = true
         
-        viewForTap.alpha = 0.0
+    }
+    
+    func configureImageView() {
+        
+        newsImageView.contentMode = .scaleAspectFill
+    }
+    
+    func configureViewForTap() {
+        
+        viewForTap.layer.cornerRadius = viewForTap.bounds.height / 2
+        viewForTap.layer.masksToBounds = true
+        viewForTap.layer.borderColor = SourceColors.labelBorderColor.cgColor
+        viewForTap.layer.borderWidth = 2
+        viewForTap.backgroundColor = SourceColors.labelRedColor
     }
     
     func getTextSeparatedBySpaceFromModel(_ model: NewsModel) -> String {

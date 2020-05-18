@@ -12,14 +12,16 @@ class MenuViewController: UIViewController {
     
     // MARK: - Private Properties
     
+    private let rssService = RSSService()
+    
     private var tableView: UITableView!
-    private var timer: Timer?
     
     // MARK: - Public Properties
     
     var categoryName = ""
     
     weak var delegate: ContainerViewControllerDelegate?
+    weak var NFCdelegate: NewsFeedScreenControllerDelegate?
     
     // MARK: - Life Cycle
 
@@ -35,9 +37,12 @@ class MenuViewController: UIViewController {
 
 private extension MenuViewController {
     
+    // MARK: - Configure TableView
+    
     func configureTableView() {
         
         tableView = UITableView()
+        tableView.translatesAutoresizingMaskIntoConstraints = false
         
         tableView.delegate = self
         tableView.dataSource = self
@@ -49,7 +54,7 @@ private extension MenuViewController {
         
         tableView.separatorStyle = .none
         tableView.rowHeight = 60
-        tableView.backgroundColor = SourceColors.commonLightBlueColor
+        tableView.backgroundColor = UIColor.darkGray
         tableView.contentInset = UIEdgeInsets.init(top: 0, left: 0, bottom: 90, right: 0)
         
         // tableView constraints
@@ -82,27 +87,13 @@ private extension MenuViewController {
     
     func updateSelectedCellBackgroundView(_ cell: UITableViewCell) {
         let customView = UIView()
-        customView.backgroundColor = SourceColors.commonBackgroundColor
+        customView.backgroundColor = UIColor.lightGray
         cell.selectedBackgroundView = customView
     }
     
     func checkSelectedCells() {
         let indexPath = IndexPath(row: 0, section: 0)
         tableView.selectRow(at: indexPath, animated: false, scrollPosition: .none)
-    }
-    
-    // MARK: - Delay before menu controller will collapse
-    
-    func startTimer() {
-        if timer == nil {
-            timer = Timer.scheduledTimer(timeInterval: 0.3, target: self, selector: #selector(collapseMenu), userInfo: nil, repeats: false)
-        }
-    }
-    
-    @objc func collapseMenu() {
-        delegate?.shouldMoveBackController()
-        timer?.invalidate()
-        timer = nil
     }
 }
 
@@ -122,14 +113,32 @@ extension MenuViewController: UITableViewDelegate {
         }
         if menuModel == MenuModel.Settings {
             tableView.deselectRow(at: indexPath, animated: true)
-            print("Settings is tapped")
             AppCoordinator.shared.goToSettingsScreenController(from: self)
         } else {
-            ServiceAPI.shared.storeNews(by: menuModel)
-            categoryName = menuModel.description
+            if NetStatus.shared.isConnected {
+                categoryName = menuModel.description
+                self.NFCdelegate?.category = menuModel
+                self.NFCdelegate?.fetchNews(using: menuModel, nil)
+                self.delegate?.shouldMoveBackController()
+                self.NFCdelegate?.didStartSpinner()
+            } else {
+                categoryName = menuModel.description
+                StorageManager.shared.removeAll()
+                DispatchQueue.main.async {
+                    self.delegate?.shouldMoveBackController()
+                    self.NFCdelegate?.reloadTableView()
+                    self.NFCdelegate?.didStartSpinner()
+                }
+            }
+            
+            if StorageManager.shared.models.isEmpty {
+                NetStatus.shared.netStatusChangeHandler = { [unowned self] in
+                    if NetStatus.shared.isMonitoring, NetStatus.shared.isConnected {
+                        self.NFCdelegate?.fetchNews(using: menuModel, nil)
+                    }
+                }
+            }
         }
-        startTimer()
-        
     }
 }
 

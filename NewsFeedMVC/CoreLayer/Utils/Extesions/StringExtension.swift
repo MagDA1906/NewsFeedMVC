@@ -16,4 +16,14 @@ extension String {
             self = components.first!
         }
     }
+    
+    mutating func replacingNewlineCharWithSpace() {
+        self = self.replacingOccurrences(of: "\n", with: " ")
+    }
+    
+    mutating func replacingDoubleSpace() {
+        if self.hasPrefix("  ") {
+            self = self.replacingOccurrences(of: "  ", with: "")
+        }
+    }
 }

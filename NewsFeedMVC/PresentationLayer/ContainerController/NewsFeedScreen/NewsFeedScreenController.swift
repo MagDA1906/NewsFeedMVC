@@ -8,11 +8,26 @@
 
 import UIKit
 
-protocol NewsFeedScreenControllerProtocol {
-    var dowmloadCounter: Int { get set }
+protocol NewsFeedScreenControllerDelegate: class {
+    
+    var category: MenuModel? { get set }
+    
+    func didStartSpinner()
+    func didStopSpinner()
+    func reloadTableView()
+    func fetchNews(using category: MenuModel, _ searchingString: String?)
+    
 }
 
-class NewsFeedScreenController: UIViewController, NewsFeedScreenControllerProtocol {
+class NewsFeedScreenController: UIViewController {
+    
+    // MARK: - IBOutlets
+    
+    @IBOutlet private weak var tableView: UITableView!
+    @IBOutlet private weak var searchBar: UISearchBar!
+
+    
+    private let rssService = RSSService()
     
     private enum State {
         
@@ -29,67 +44,62 @@ class NewsFeedScreenController: UIViewController, NewsFeedScreenControllerProtoc
         }
     }
     
-    // MARK: - Public Properties
-    
-    var dowmloadCounter = 0
-    
     // MARK: - Private Properties
     
+    private var spinner: UIActivityIndicatorView!
     private var currentIndexPath: IndexPath?
     private var oldIndexPath: IndexPath?
     private var state: State = .collapsed
-    private var quantityNews = 10
+    private var numberOfNews = 10
+    private var newsCategory: MenuModel?
+    private var timer: Timer?
     
-    private let downloadButton: UIButton = {
-        let button = UIButton(type: .custom)
-        button.setImage(SourceImages.downloadImage, for: .normal)
-        button.translatesAutoresizingMaskIntoConstraints = false
-        button.contentMode = .scaleAspectFit
-        button.clipsToBounds = true
-        button.isHidden = true
-        
-        return button
+    // MARK: - Closures
+    
+    private let refreshControl: UIRefreshControl = {
+        let refreshControl = UIRefreshControl()
+        refreshControl.addTarget(self, action: #selector(refresh(sender:)), for: .valueChanged)
+        return refreshControl
     }()
-    
-    private let footerView: UIView = {
-        let view = UIView(frame: CGRect(x: 0, y: 0, width: 50, height: 50))
-        view.backgroundColor = UIColor.clear
-        return view
-    }()
-    
-    // MARK: - IBOutlets
-    
-    @IBOutlet private weak var tableView: UITableView!
-    @IBOutlet private weak var spinner: UIActivityIndicatorView!
     
     // MARK: - Life Cycle
     
+    var menuController: MenuViewController?
+    
+    init() {
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    convenience init(controller: MenuViewController) {
+        self.init()
+        self.menuController = controller
+        
+        guard let menuController = menuController else { return }
+        menuController.NFCdelegate = self
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        print("NewsFeedScreenController is load")
         
-        fetchNews()
-    
         addTapGestureRecognizer()
         
         configureTableView()
+        configureSearchBar()
         configureSpinner()
         
-        tableView.reloadData()
+        checkConnection()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         print("NewsFeedScreenController reload table view!")
-        tableView.reloadData()
-    }
-}
+        
+        startMonitoringNetStatus()
 
-// MARK: - Public Functions
-
-extension NewsFeedScreenController {
-    
-    func updateTableView() {
         tableView.reloadData()
     }
 }
@@ -98,21 +108,29 @@ extension NewsFeedScreenController {
 
 private extension NewsFeedScreenController {
     
-    func fetchNews() {
-        
+    // MARK: - Start monitoring internet connection
+    
+    func startMonitoringNetStatus() {
+
+        if !NetStatus.shared.isMonitoring {
+            NetStatus.shared.startMonitoring()
+        }
+    }
+
+    // If app launched without internet connection, we should monitoring connection and if connection is successed reload data
+    func checkConnection() {
+        // will launched one time
         spinner.startAnimating()
-        
-        ServiceAPI.shared.fetchNews { (didFetch) in
-            if didFetch {
-                
-                DispatchQueue.main.async {
-                    self.tableView.reloadData()
-                    self.spinner.stopAnimating()
-                    self.spinner.hidesWhenStopped = true
+        NetStatus.shared.netStatusChangeHandler = { [unowned self] in
+            if StorageManager.shared.models.isEmpty {
+                if NetStatus.shared.isMonitoring, NetStatus.shared.isConnected {
+                    self.fetchNews(using: .AllNews, nil)
                 }
             }
         }
     }
+    
+    // MARK: - GestureRecognizer
     
     func addTapGestureRecognizer() {
         
@@ -133,11 +151,35 @@ private extension NewsFeedScreenController {
                 let frameInSuperView = cell.getViewForTap().convert(cell.getViewForTap().bounds, to: tableView)
                 
                 if frameInSuperView.contains(touch) {
-                    AppCoordinator.shared.goToNewsSourceScreenController(from: self, with: indexPath)
+                    tableView.allowsSelection = false
+                    let tappedView = cell.getViewForTap()
+                    UIView.animate(withDuration: 0.1, animations: {
+                        tappedView.transform = CGAffineTransform(scaleX: 1.1, y: 1.1)
+                    }) { (finished) in
+                        UIView.animate(withDuration: 0.1, animations: {
+                            tappedView.transform = CGAffineTransform(scaleX: 1.0, y: 1.0)
+                        }, completion: { [weak self] (finished) in
+                            guard let self = self else { return }
+                            self.tableView.allowsSelection = true
+                            AppCoordinator.shared.goToNewsSourceScreenController(from: self, with: indexPath)
+                        })
+                    }
                 }
             }
         }
     }
+    
+    // Added refresh control function for update data
+    @objc func refresh(sender: UIRefreshControl) {
+        if NetStatus.shared.isConnected {
+            let category = newsCategory ?? MenuModel.AllNews
+            print("\(category.description)")
+            fetchNews(using: category, nil)
+        }
+        sender.endRefreshing()
+    }
+    
+    // MARK: - Configure TableView
     
     func configureTableView() {
         
@@ -151,19 +193,32 @@ private extension NewsFeedScreenController {
         tableView.register(extendedCellNib, forCellReuseIdentifier: extendedCellReuseID)
         
         tableView.rowHeight = UITableView.automaticDimension
-        tableView.estimatedRowHeight = 800
+        tableView.estimatedRowHeight = 600
         
         tableView.delegate    = self
         tableView.dataSource  = self
         
         tableView.separatorColor = .clear
-        tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
-        tableView.backgroundColor = SourceColors.commonBackgroundColor
+        tableView.backgroundColor = .white
         
-        view.backgroundColor = SourceColors.commonBackgroundColor
+        tableView.refreshControl = refreshControl
         
-        configureFooterView()
+    }
+    
+    // MARK: - Configure Spinner
+    
+    func configureSpinner() {
         
+        spinner = UIActivityIndicatorView()
+        spinner.style = .whiteLarge
+        spinner.color = UIColor.darkGray
+        spinner.translatesAutoresizingMaskIntoConstraints = false
+        tableView.addSubview(spinner)
+
+
+        // spinner constraints
+        spinner.centerYAnchor.constraint(equalTo: tableView.centerYAnchor).isActive = true
+        spinner.centerXAnchor.constraint(equalTo: tableView.centerXAnchor).isActive = true
     }
     
     // MARK: - Create DefaultNewsTableViewCell
@@ -173,7 +228,7 @@ private extension NewsFeedScreenController {
         guard let defaultCell = cell as? DefaultNewsTableViewCell else {
             return cell
         }
-        defaultCell.setupWithModel(ServiceAPI.shared.getNewsAtIndexPath(indexPath))
+        defaultCell.setupWithModel(StorageManager.shared.getModel(by: indexPath))
         return defaultCell
     }
     
@@ -184,47 +239,42 @@ private extension NewsFeedScreenController {
         guard let extendedCell = cell as? ExtendedNewsTableViewCell else {
             return cell
         }
-        extendedCell.setupWithModel(ServiceAPI.shared.getNewsAtIndexPath(indexPath))
+        extendedCell.setupWithModel(StorageManager.shared.getModel(by: indexPath))
         return extendedCell
     }
     
-    // MARK: - Configure Spinner
+    // MARK: - Cnfigure UISearchBar
     
-    func configureSpinner() {
-        spinner.style = .whiteLarge
-        spinner.color = SourceColors.commonBackgroundColor
-    }
-    
-    // MARK: - Configure FooterView
-    
-    func configureFooterView() {
-        footerView.addSubview(downloadButton)
-        downloadButton.addTarget(self, action: #selector(actionFooterButton), for: UIControl.Event.touchUpInside)
-
-        // footerButton constraints
-        downloadButton.centerXAnchor.constraint(equalTo: footerView.centerXAnchor).isActive = true
-        downloadButton.centerYAnchor.constraint(equalTo: footerView.centerYAnchor).isActive = true
+    func configureSearchBar() {
+        searchBar.delegate = self
+        searchBar.showsCancelButton = false
+//        searchBar.barTintColor = SourceColors.labelRedColor
+//        searchBar.barTintColor = .white
+        searchBar.autocapitalizationType = .none
+        searchBar.backgroundColor = .white
+        searchBar.returnKeyType = .done
         
-        tableView.tableFooterView = footerView
     }
     
-    @objc func actionFooterButton(_ sender: UIButton) {
-        print("Footer button is taped!")
-        dowmloadCounter = dowmloadCounter + quantityNews
-        tableView.reloadData()
-        aniamteDownloadButton(sender)
-    }
-    
-    // animation FooterButton
-    
-    func aniamteDownloadButton(_ sender: UIButton) {
-        let springAnimation = CASpringAnimation(keyPath: "transform.scale")
-        springAnimation.fromValue = 1
-        springAnimation.toValue = 2
-        springAnimation.duration = 0.06
-        springAnimation.repeatCount = 1
-        springAnimation.autoreverses = true
-        sender.layer.add(springAnimation, forKey: "transform.scale")
+    // MARK: - Configure Timer
+
+    func startTimerWith(_ searchingString: String) {
+        
+        if timer != nil {
+            timer!.invalidate()
+            timer = nil
+        }
+        
+        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false, block: { [unowned self] (timer) in
+            print("Finished timer")
+            if NetStatus.shared.isConnected {
+                self.spinner.startAnimating()
+                let category = self.newsCategory ?? MenuModel.AllNews
+                self.fetchNews(using: category, searchingString)
+            }
+            
+            timer.invalidate()
+        })
     }
 }
 
@@ -233,6 +283,7 @@ private extension NewsFeedScreenController {
 extension NewsFeedScreenController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        
         tableView.deselectRow(at: indexPath, animated: false)
         
         guard let cell = tableView.cellForRow(at: indexPath) else { return }
@@ -240,22 +291,21 @@ extension NewsFeedScreenController: UITableViewDelegate {
         if state == .collapsed {
             
             if cell is DefaultNewsTableViewCell {
-                
                 tableView.beginUpdates()
                 state = state.change
                 tableView.reloadRows(at: [indexPath], with: .right)
                 currentIndexPath = indexPath
                 tableView.endUpdates()
+                tableView.scrollToRow(at: indexPath, at: .top, animated: true)
             }
         } else {
             
             if cell is ExtendedNewsTableViewCell {
-                
                 tableView.beginUpdates()
                 state = state.change
                 tableView.reloadRows(at: [indexPath], with: .left)
                 tableView.endUpdates()
-                
+                tableView.scrollToRow(at: indexPath, at: .middle, animated: true)
             } else {
                 
                 tableView.beginUpdates()
@@ -266,20 +316,9 @@ extension NewsFeedScreenController: UITableViewDelegate {
                 if let oldIndex = oldIndexPath {
                     tableView.reloadRows(at: [oldIndex], with: .left)
                 }
-                
                 tableView.endUpdates()
+                tableView.scrollToRow(at: indexPath, at: .top, animated: true)
             }
-        }
-        
-    }
-    
-    // Hide or show DownloadButton
-    
-    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        if (ServiceAPI.shared.getNews().count - dowmloadCounter) > quantityNews  {
-            downloadButton.isHidden = false
-        } else {
-            downloadButton.isHidden = true
         }
     }
 }
@@ -287,8 +326,9 @@ extension NewsFeedScreenController: UITableViewDelegate {
 // MARK: - UITableViewDataSource
 
 extension NewsFeedScreenController: UITableViewDataSource {
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return ServiceAPI.shared.getNews().prefix(quantityNews + dowmloadCounter).count
+        return StorageManager.shared.getNumberOfElements()
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -305,5 +345,92 @@ extension NewsFeedScreenController: UITableViewDataSource {
         }
         
         return defaultCellForIndexPath(indexPath)
+    }
+}
+
+// MARK: - NewsFeedScreenControllerDelegate
+
+extension NewsFeedScreenController: NewsFeedScreenControllerDelegate {
+    
+    var category: MenuModel? {
+        get {
+            return newsCategory
+        }
+        set {
+            newsCategory = newValue
+        }
+    }
+    
+    func didStartSpinner() {
+        
+        spinner.startAnimating()
+        self.view.bringSubviewToFront(spinner)
+    }
+    
+    func didStopSpinner() {
+        
+        spinner.stopAnimating()
+    }
+    // TODO: If one of the cell is expanded it is should be colapsed
+    func reloadTableView() {
+        tableView.reloadData()
+        if !StorageManager.shared.models.isEmpty {
+            tableView.scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: true)
+        }
+    }
+    
+    func fetchNews(using category: MenuModel, _ searchingString: String?) {
+        
+        rssService.fetchNews { [weak self] (models, error) in
+            guard let self = self else { return }
+            
+            guard let models = models else { return }
+            DispatchQueue.main.async {
+                
+                StorageManager.shared.save(data: models, by: category)
+                
+                if searchingString != nil {
+                    StorageManager.shared.filteringModels(by: searchingString!)
+                }
+                
+                self.reloadTableView()
+                self.didStopSpinner()
+            }
+        }
+    }
+}
+
+// MARK: - UISearchBarDelegate
+
+extension NewsFeedScreenController: UISearchBarDelegate {
+    
+    func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
+        
+        searchBar.setShowsCancelButton(true, animated: true)
+        print("searchBarTextDidBeginEditing")
+    }
+    
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        
+        searchBar.text = ""
+        
+        if NetStatus.shared.isConnected {
+            let category = newsCategory ?? MenuModel.AllNews
+            print("\(category.description)")
+            fetchNews(using: category, nil)
+        }
+        
+        searchBar.resignFirstResponder()
+        searchBar.setShowsCancelButton(false, animated: true)
+    }
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+
+        print("SearchBarText = \(searchText)")
+        startTimerWith(searchText)
+    }
+    
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        searchBar.resignFirstResponder()
     }
 }

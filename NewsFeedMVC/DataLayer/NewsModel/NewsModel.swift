@@ -8,6 +8,11 @@
 
 import Foundation
 
+private enum ReturnType {
+    case returnString
+    case returnDate
+}
+
 struct NewsModel: Hashable, Equatable {
     
     var isViewed = false
@@ -17,8 +22,15 @@ struct NewsModel: Hashable, Equatable {
     var newsTitle: String = ""
     var newsDescription: String = ""
     var imageURL: String = ""
-    var dateOfCreation: String = ""
     var category: String = ""
+    var dateOfCreation: String = ""
+    // use formattedDate isntead dateOfCreating
+    var formattedDate: String {
+        return getFormattedDate(description: .returnString) ?? "Date undefined"
+    }
+    var date: Date {
+        return getFormattedDate(description: .returnDate) ?? Date()
+    }
     
     init(newsResource: String, newsLink: String, newsTitle: String, newsDescription: String, dateOfCreation: String, imageURL: String, category: String) {
         
@@ -32,4 +44,31 @@ struct NewsModel: Hashable, Equatable {
     }
     
     init() {}
+    
+}
+
+private extension NewsModel {
+
+    func getFormattedDate<T>(description: ReturnType) -> T? {
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "EEE, dd MMM yyyy HH:mm:ss ZZ\n "
+        
+        let dateString = dateOfCreation
+        let dateComponents = dateString.components(separatedBy: "\n")
+        
+        if (dateComponents.first != nil) {
+            if let date = dateFormatter.date(from: dateComponents.first!) {
+                dateFormatter.dateFormat = "dd MMM yyyy HH:mm"
+                let formatedDateString = dateFormatter.string(from: date)
+                switch description {
+                case .returnDate:
+                    return date as? T
+                case .returnString:
+                    return formatedDateString as? T
+                }
+            }
+        }
+        return nil
+    }
 }

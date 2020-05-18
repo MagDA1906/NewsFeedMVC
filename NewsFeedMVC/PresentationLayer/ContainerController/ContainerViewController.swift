@@ -36,14 +36,16 @@ class ContainerViewController: UIViewController, ContainerViewControllerDelegate
         print("ContainerViewController is created!")
         
         addSettingsBarButton()
+        configureMenuController()
         configureNewsFeedController()
     }
     
+    deinit {
+        NetStatus.shared.stopMonitoring()
+    }
+    
     func shouldMoveBackController() {
-        if let vc = self.controller as? NewsFeedScreenController {
-            vc.dowmloadCounter = 0
-            vc.updateTableView()
-        }
+
         if let vc = self.menuController as? MenuViewController {
             self.categoryName = vc.categoryName
             self.navigationItem.title = vc.categoryName
@@ -59,11 +61,18 @@ private extension ContainerViewController {
     
     func configureNavigationItem() {
         
+//        navigationController?.navigationBar.prefersLargeTitles = true
+//        navigationItem.hidesSearchBarWhenScrolling = true
+//        navigationItem.largeTitleDisplayMode = .automatic
+        
         navigationItem.hidesBackButton = true
         
         navigationController?.setNavigationBarHidden(false, animated: true)
-        navigationController?.navigationBar.barTintColor = SourceColors.commonBackgroundColor
+        navigationController?.navigationBar.barTintColor = SourceColors.labelRedColor
         navigationController?.navigationBar.isTranslucent = false
+        
+        let textAttributes = [NSAttributedString.Key.foregroundColor:UIColor.white]
+        navigationController?.navigationBar.titleTextAttributes = textAttributes
         
         navigationItem.title = categoryName
     }
@@ -84,10 +93,13 @@ private extension ContainerViewController {
     }
     
     // MARK: - Initialized NewsFeedScreenController
-    
+    // configure NewsFeedController with MenuViewController as a parameter
     func configureNewsFeedController() {
-        let newsFeedController = NewsFeedScreenController()
+        
+        guard let menuController = menuController as? MenuViewController else { return }
+        let newsFeedController = NewsFeedScreenController(controller: menuController)
         controller = newsFeedController
+        controller.view.frame = view.frame
         view.addSubview(controller.view)
         addChild(controller)
     }
@@ -139,7 +151,6 @@ private extension ContainerViewController {
     // MARK: - Create switched menu
     
     func toggleMenu() {
-        configureMenuController()
         isMove = !isMove
         showMenuViewController(shouldMove: isMove)
     }
