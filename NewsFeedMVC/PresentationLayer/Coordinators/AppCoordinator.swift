@@ -44,6 +44,7 @@ final class AppCoordinator {
         let vc = NewsSourceScreenController()
         
         vc.resourceURL = StorageManager.shared.getModel(by: indexPath).newsLink
+        vc.resourceTitle = StorageManager.shared.getModel(by: indexPath).newsResource
         StorageManager.shared.setModelToViewedState(by: indexPath)
         
         source.navigationController?.pushViewController(vc, animated: true)

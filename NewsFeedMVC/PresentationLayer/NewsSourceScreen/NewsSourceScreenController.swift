@@ -19,6 +19,7 @@ class NewsSourceScreenController: UIViewController {
     // MARK: - Public Properties
     
     var resourceURL: String?
+    var resourceTitle: String?
     
     // MARK: - Life cycle
     
@@ -37,6 +38,8 @@ class NewsSourceScreenController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        configureActivityIndicator()
+        
         webView.navigationDelegate = self
         
         sendRequest()
@@ -54,7 +57,8 @@ private extension NewsSourceScreenController {
         navigationController?.navigationBar.tintColor = UIColor.white
         navigationController?.navigationBar.isTranslucent = false
         
-        navigationItem.title = "Source news"
+        guard let resourceTitle = resourceTitle else { return }
+        navigationItem.title = resourceTitle
     }
     
     func showActivityIndicator(show: Bool) {
@@ -66,14 +70,14 @@ private extension NewsSourceScreenController {
         }
     }
     
-    private func setActivityIndicator() {
+    func configureActivityIndicator() {
         
         // Configure Activity Indicator
         
         activityIndicator = UIActivityIndicatorView()
         activityIndicator.hidesWhenStopped = true
         activityIndicator.style = .whiteLarge
-        activityIndicator.color = SourceColors.commonBackgroundColor
+        activityIndicator.color = UIColor.darkGray
         activityIndicator.translatesAutoresizingMaskIntoConstraints = false
         webView.addSubview(activityIndicator)
         
@@ -85,11 +89,11 @@ private extension NewsSourceScreenController {
     
     func sendRequest() {
         
-        var modifiedString = ""
-        
         guard let resourceURL = resourceURL else {
             return
         }
+        
+        var modifiedString = resourceURL
         
         if resourceURL.contains("\n  ") {
             modifiedString = resourceURL.replacingOccurrences(of: "\n  ", with: "")
@@ -107,7 +111,6 @@ private extension NewsSourceScreenController {
 extension NewsSourceScreenController: WKNavigationDelegate {
     
     func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
-        setActivityIndicator()
         showActivityIndicator(show: true)
     }
     
