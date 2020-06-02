@@ -20,6 +20,8 @@ class MenuViewController: UIViewController {
     
     var categoryName = ""
     
+    // MARK: - Deleagate
+    
     weak var delegate: ContainerViewControllerDelegate?
     weak var NFCdelegate: NewsFeedScreenControllerDelegate?
     

@@ -23,18 +23,13 @@ class ContainerViewController: UIViewController, ContainerViewControllerDelegate
     private var categoryName = "Картина дня"
     
     // MARK: - Life Cycle
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(true)
-        
-        configureNavigationItem()
-    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
         
         print("ContainerViewController is created!")
         
+        configureNavigationItem()
         addSettingsBarButton()
         configureMenuController()
         configureNewsFeedController()
@@ -44,6 +39,8 @@ class ContainerViewController: UIViewController, ContainerViewControllerDelegate
         NetStatus.shared.stopMonitoring()
     }
     
+    // MARK: - Delegate MenuController
+    
     func shouldMoveBackController() {
 
         if let vc = self.menuController as? MenuViewController {
@@ -52,7 +49,6 @@ class ContainerViewController: UIViewController, ContainerViewControllerDelegate
         }
         toggleMenu()
     }
-    
 }
 
 private extension ContainerViewController {
@@ -61,16 +57,14 @@ private extension ContainerViewController {
     
     func configureNavigationItem() {
         
-//        navigationController?.navigationBar.prefersLargeTitles = true
-//        navigationItem.hidesSearchBarWhenScrolling = true
-//        navigationItem.largeTitleDisplayMode = .automatic
-        
         navigationItem.hidesBackButton = true
-        
+
         navigationController?.setNavigationBarHidden(false, animated: true)
         navigationController?.navigationBar.barTintColor = SourceColors.labelRedColor
+        navigationController?.navigationBar.shadowImage = UIImage()
         navigationController?.navigationBar.isTranslucent = false
         
+
         let textAttributes = [NSAttributedString.Key.foregroundColor:UIColor.white]
         navigationController?.navigationBar.titleTextAttributes = textAttributes
         

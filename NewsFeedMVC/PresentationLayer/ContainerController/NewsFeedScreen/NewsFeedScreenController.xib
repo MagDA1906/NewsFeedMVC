@@ -10,7 +10,6 @@
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="NewsFeedScreenController" customModule="NewsFeedMVC" customModuleProvider="target">
             <connections>
-                <outlet property="searchBar" destination="TiA-3A-QZk" id="9Ix-eS-WV2"/>
                 <outlet property="tableView" destination="YCy-nL-bVE" id="vMm-wo-XiG"/>
                 <outlet property="view" destination="iN0-l3-epB" id="5YS-sO-1cE"/>
             </connections>
@@ -20,23 +19,16 @@
             <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
-                <searchBar contentMode="redraw" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="TiA-3A-QZk">
-                    <rect key="frame" x="0.0" y="44" width="414" height="56"/>
-                    <textInputTraits key="textInputTraits"/>
-                </searchBar>
                 <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="YCy-nL-bVE">
-                    <rect key="frame" x="0.0" y="100" width="414" height="796"/>
-                    <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    <rect key="frame" x="0.0" y="44" width="414" height="852"/>
+                    <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                 </tableView>
             </subviews>
             <constraints>
                 <constraint firstItem="YCy-nL-bVE" firstAttribute="leading" secondItem="vUN-kp-3ea" secondAttribute="leading" id="0Eu-2e-PMi"/>
                 <constraint firstItem="vUN-kp-3ea" firstAttribute="trailing" secondItem="YCy-nL-bVE" secondAttribute="trailing" id="98t-Bt-rYk"/>
-                <constraint firstItem="vUN-kp-3ea" firstAttribute="trailing" secondItem="TiA-3A-QZk" secondAttribute="trailing" id="F3W-M6-q4b"/>
-                <constraint firstItem="YCy-nL-bVE" firstAttribute="top" secondItem="TiA-3A-QZk" secondAttribute="bottom" id="Js4-39-q4Y"/>
+                <constraint firstItem="YCy-nL-bVE" firstAttribute="top" secondItem="vUN-kp-3ea" secondAttribute="top" id="L6W-3E-8wD"/>
                 <constraint firstAttribute="bottom" secondItem="YCy-nL-bVE" secondAttribute="bottom" id="mKt-ss-zn7"/>
-                <constraint firstItem="TiA-3A-QZk" firstAttribute="leading" secondItem="vUN-kp-3ea" secondAttribute="leading" id="sgm-oD-ssU"/>
-                <constraint firstItem="TiA-3A-QZk" firstAttribute="top" secondItem="vUN-kp-3ea" secondAttribute="top" id="vAW-NM-p4e"/>
             </constraints>
             <viewLayoutGuide key="safeArea" id="vUN-kp-3ea"/>
             <point key="canvasLocation" x="131.8840579710145" y="139.95535714285714"/>

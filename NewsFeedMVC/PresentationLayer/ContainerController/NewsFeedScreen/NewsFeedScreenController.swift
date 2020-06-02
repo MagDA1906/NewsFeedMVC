@@ -24,7 +24,6 @@ class NewsFeedScreenController: UIViewController {
     // MARK: - IBOutlets
     
     @IBOutlet private weak var tableView: UITableView!
-    @IBOutlet private weak var searchBar: UISearchBar!
 
     
     private let rssService = RSSService()
@@ -50,9 +49,10 @@ class NewsFeedScreenController: UIViewController {
     private var currentIndexPath: IndexPath?
     private var oldIndexPath: IndexPath?
     private var state: State = .collapsed
-    private var numberOfNews = 10
     private var newsCategory: MenuModel?
     private var timer: Timer?
+    private var canTransitionToLarge = false
+    private var searchBar: UISearchBar!
     
     // MARK: - Closures
     
@@ -60,6 +60,10 @@ class NewsFeedScreenController: UIViewController {
         let refreshControl = UIRefreshControl()
         refreshControl.addTarget(self, action: #selector(refresh(sender:)), for: .valueChanged)
         return refreshControl
+    }()
+    
+    private lazy var animator: UIViewPropertyAnimator = {
+        return UIViewPropertyAnimator(duration: 0.25, curve: .easeInOut, animations: nil)
     }()
     
     // MARK: - Life Cycle
@@ -85,12 +89,12 @@ class NewsFeedScreenController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        view.backgroundColor = SourceColors.labelRedColor
+        
         addTapGestureRecognizer()
-        
-        configureTableView()
         configureSearchBar()
+        configureTableView()
         configureSpinner()
-        
         checkConnection()
     }
     
@@ -99,8 +103,13 @@ class NewsFeedScreenController: UIViewController {
         print("NewsFeedScreenController reload table view!")
         
         startMonitoringNetStatus()
-
         tableView.reloadData()
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        tableView.tableHeaderView = searchBar
     }
 }
 
@@ -199,10 +208,9 @@ private extension NewsFeedScreenController {
         tableView.dataSource  = self
         
         tableView.separatorColor = .clear
-        tableView.backgroundColor = .white
+        tableView.backgroundColor = SourceColors.labelRedColor
         
-        tableView.refreshControl = refreshControl
-        
+        tableView.refreshControl = refreshControl        
     }
     
     // MARK: - Configure Spinner
@@ -246,14 +254,18 @@ private extension NewsFeedScreenController {
     // MARK: - Cnfigure UISearchBar
     
     func configureSearchBar() {
+        searchBar = UISearchBar(frame: CGRect(x: 0.0, y: 0.0, width: tableView.frame.size.width, height: 44.0))
         searchBar.delegate = self
         searchBar.showsCancelButton = false
-//        searchBar.barTintColor = SourceColors.labelRedColor
-//        searchBar.barTintColor = .white
+        searchBar.barTintColor = SourceColors.labelRedColor
         searchBar.autocapitalizationType = .none
         searchBar.backgroundColor = .white
         searchBar.returnKeyType = .done
+        searchBar.isHidden = false
         
+        if #available(iOS 13.0, *) {
+            searchBar.searchTextField.backgroundColor = .white
+        }
     }
     
     // MARK: - Configure Timer
