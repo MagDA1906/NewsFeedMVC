@@ -8,14 +8,9 @@
 
 import UIKit
 
-protocol NewsFeedScreenControllerDelegate: class {
-    
-    var category: MenuModel? { get set }
-    
-    func didStartSpinner()
-    func didStopSpinner()
-    func reloadTableView()
-    func fetchNews(using category: MenuModel, _ searchingString: String?)
+protocol NewsFeedScreenControllerProtocol: class {
+
+    func shouldReloadData(using selectedCategory: MenuModel)
     
 }
 
@@ -54,6 +49,15 @@ class NewsFeedScreenController: UIViewController {
     private var canTransitionToLarge = false
     private var searchBar: UISearchBar!
     
+    private var category: MenuModel? {
+        get {
+            return newsCategory
+        }
+        set {
+            newsCategory = newValue
+        }
+    }
+    
     // MARK: - Closures
     
     private let refreshControl: UIRefreshControl = {
@@ -67,24 +71,6 @@ class NewsFeedScreenController: UIViewController {
     }()
     
     // MARK: - Life Cycle
-    
-    var menuController: MenuViewController?
-    
-    init() {
-        super.init(nibName: nil, bundle: nil)
-    }
-    
-    convenience init(controller: MenuViewController) {
-        self.init()
-        self.menuController = controller
-        
-        guard let menuController = menuController else { return }
-        menuController.NFCdelegate = self
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -110,6 +96,7 @@ class NewsFeedScreenController: UIViewController {
         super.viewDidAppear(animated)
         
         tableView.tableHeaderView = searchBar
+        searchBar.isHidden = false
     }
 }
 
@@ -137,6 +124,45 @@ private extension NewsFeedScreenController {
                 }
             }
         }
+    }
+    
+    // TODO: If one of the cell is expanded it is should be colapsed
+    func reloadTableView() {
+        tableView.reloadData()
+        if !StorageManager.shared.currentModels.isEmpty {
+            tableView.scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: true)
+        }
+    }
+    
+    // MARK: - Fetch news
+    
+    func fetchNews(using category: MenuModel, _ searchingString: String?) {
+        
+        rssService.fetchNews { [weak self] (models, error) in
+            guard let self = self else { return }
+            
+            guard let models = models else { return }
+            DispatchQueue.main.async {
+                
+                StorageManager.shared.save(data: models, by: category)
+                
+                self.reloadTableView()
+                self.didStopSpinner()
+            }
+        }
+    }
+    
+    // MARK: - Start and Stop Spinner
+    
+    func didStartSpinner() {
+        
+        spinner.startAnimating()
+        self.view.bringSubviewToFront(spinner)
+    }
+    
+    func didStopSpinner() {
+        
+        spinner.stopAnimating()
     }
     
     // MARK: - GestureRecognizer
@@ -229,6 +255,47 @@ private extension NewsFeedScreenController {
         spinner.centerXAnchor.constraint(equalTo: tableView.centerXAnchor).isActive = true
     }
     
+    // MARK: - Cnfigure UISearchBar
+    
+    func configureSearchBar() {
+        searchBar = UISearchBar(frame: CGRect(x: 0.0, y: 0.0, width: tableView.frame.size.width, height: 44.0))
+        searchBar.delegate = self
+        searchBar.showsCancelButton = false
+        searchBar.barTintColor = SourceColors.labelRedColor
+        searchBar.autocapitalizationType = .none
+        searchBar.backgroundColor = .white
+        searchBar.returnKeyType = .done
+        searchBar.isHidden = false
+        searchBar.tintColor = .white
+        
+        if #available(iOS 13.0, *) {
+            searchBar.searchTextField.backgroundColor = .white
+            searchBar.searchTextField.textColor = .black
+        }
+    }
+    
+    // MARK: - Configure Timer
+
+    func startTimerWith(_ searchingString: String) {
+        
+        if timer != nil {
+            timer!.invalidate()
+            timer = nil
+        }
+        
+        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false, block: { [unowned self] (timer) in
+            
+            let category = self.newsCategory ?? MenuModel.AllNews
+            if searchingString == "" {
+                StorageManager.shared.filteringModels(by: nil, with: category)
+            } else {
+                StorageManager.shared.filteringModels(by: searchingString, with: category)
+            }
+            self.reloadTableView()
+            timer.invalidate()
+        })
+    }
+    
     // MARK: - Create DefaultNewsTableViewCell
     
     func defaultCellForIndexPath(_ indexPath: IndexPath) -> UITableViewCell {
@@ -249,44 +316,6 @@ private extension NewsFeedScreenController {
         }
         extendedCell.setupWithModel(StorageManager.shared.getModel(by: indexPath))
         return extendedCell
-    }
-    
-    // MARK: - Cnfigure UISearchBar
-    
-    func configureSearchBar() {
-        searchBar = UISearchBar(frame: CGRect(x: 0.0, y: 0.0, width: tableView.frame.size.width, height: 44.0))
-        searchBar.delegate = self
-        searchBar.showsCancelButton = false
-        searchBar.barTintColor = SourceColors.labelRedColor
-        searchBar.autocapitalizationType = .none
-        searchBar.backgroundColor = .white
-        searchBar.returnKeyType = .done
-        searchBar.isHidden = false
-        
-        if #available(iOS 13.0, *) {
-            searchBar.searchTextField.backgroundColor = .white
-        }
-    }
-    
-    // MARK: - Configure Timer
-
-    func startTimerWith(_ searchingString: String) {
-        
-        if timer != nil {
-            timer!.invalidate()
-            timer = nil
-        }
-        
-        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false, block: { [unowned self] (timer) in
-            print("Finished timer")
-            if NetStatus.shared.isConnected {
-                self.spinner.startAnimating()
-                let category = self.newsCategory ?? MenuModel.AllNews
-                self.fetchNews(using: category, searchingString)
-            }
-            
-            timer.invalidate()
-        })
     }
 }
 
@@ -360,55 +389,14 @@ extension NewsFeedScreenController: UITableViewDataSource {
     }
 }
 
-// MARK: - NewsFeedScreenControllerDelegate
+// MARK: - NewsFeedScreenControllerProtocol
 
-extension NewsFeedScreenController: NewsFeedScreenControllerDelegate {
+extension NewsFeedScreenController: NewsFeedScreenControllerProtocol {
     
-    var category: MenuModel? {
-        get {
-            return newsCategory
-        }
-        set {
-            newsCategory = newValue
-        }
-    }
-    
-    func didStartSpinner() {
-        
-        spinner.startAnimating()
-        self.view.bringSubviewToFront(spinner)
-    }
-    
-    func didStopSpinner() {
-        
-        spinner.stopAnimating()
-    }
-    // TODO: If one of the cell is expanded it is should be colapsed
-    func reloadTableView() {
-        tableView.reloadData()
-        if !StorageManager.shared.models.isEmpty {
-            tableView.scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: true)
-        }
-    }
-    
-    func fetchNews(using category: MenuModel, _ searchingString: String?) {
-        
-        rssService.fetchNews { [weak self] (models, error) in
-            guard let self = self else { return }
-            
-            guard let models = models else { return }
-            DispatchQueue.main.async {
-                
-                StorageManager.shared.save(data: models, by: category)
-                
-                if searchingString != nil {
-                    StorageManager.shared.filteringModels(by: searchingString!)
-                }
-                
-                self.reloadTableView()
-                self.didStopSpinner()
-            }
-        }
+    func shouldReloadData(using selectedCategory: MenuModel) {
+        category = selectedCategory
+        StorageManager.shared.filteringModels(by: nil, with: selectedCategory)
+        reloadTableView()
     }
 }
 
@@ -425,13 +413,9 @@ extension NewsFeedScreenController: UISearchBarDelegate {
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
         
         searchBar.text = ""
-        
-        if NetStatus.shared.isConnected {
-            let category = newsCategory ?? MenuModel.AllNews
-            print("\(category.description)")
-            fetchNews(using: category, nil)
-        }
-        
+        let category = newsCategory ?? MenuModel.AllNews
+        StorageManager.shared.filteringModels(by: nil, with: category)
+        reloadTableView()
         searchBar.resignFirstResponder()
         searchBar.setShowsCancelButton(false, animated: true)
     }

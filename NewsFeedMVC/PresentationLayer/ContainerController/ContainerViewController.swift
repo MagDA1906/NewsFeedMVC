@@ -10,6 +10,7 @@ import UIKit
 
 protocol ContainerViewControllerDelegate: class {
     func shouldMoveBackController()
+    func shouldReloadData(using category: MenuModel)
 }
 
 class ContainerViewController: UIViewController, ContainerViewControllerDelegate {
@@ -27,19 +28,14 @@ class ContainerViewController: UIViewController, ContainerViewControllerDelegate
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        print("ContainerViewController is created!")
-        
         configureNavigationItem()
         addSettingsBarButton()
-        configureMenuController()
         configureNewsFeedController()
+        
+        
     }
     
-    deinit {
-        NetStatus.shared.stopMonitoring()
-    }
-    
-    // MARK: - Delegate MenuController
+    // MARK: - Delegating methods
     
     func shouldMoveBackController() {
 
@@ -48,6 +44,10 @@ class ContainerViewController: UIViewController, ContainerViewControllerDelegate
             self.navigationItem.title = vc.categoryName
         }
         toggleMenu()
+    }
+    
+    func shouldReloadData(using category: MenuModel) {
+        (controller as! NewsFeedScreenController).shouldReloadData(using: category)
     }
 }
 
@@ -87,11 +87,9 @@ private extension ContainerViewController {
     }
     
     // MARK: - Initialized NewsFeedScreenController
-    // configure NewsFeedController with MenuViewController as a parameter
     func configureNewsFeedController() {
         
-        guard let menuController = menuController as? MenuViewController else { return }
-        let newsFeedController = NewsFeedScreenController(controller: menuController)
+        let newsFeedController = NewsFeedScreenController()
         controller = newsFeedController
         controller.view.frame = view.frame
         view.addSubview(controller.view)
@@ -101,6 +99,7 @@ private extension ContainerViewController {
     // MARK: - Initialized MenuViewController
     
     func configureMenuController() {
+        
         if menuController == nil {
             menuController = MenuViewController()
             view.insertSubview(menuController.view, at: 0)
@@ -145,6 +144,7 @@ private extension ContainerViewController {
     // MARK: - Create switched menu
     
     func toggleMenu() {
+        configureMenuController()
         isMove = !isMove
         showMenuViewController(shouldMove: isMove)
     }

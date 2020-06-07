@@ -12,8 +12,6 @@ class MenuViewController: UIViewController {
     
     // MARK: - Private Properties
     
-    private let rssService = RSSService()
-    
     private var tableView: UITableView!
     
     // MARK: - Public Properties
@@ -23,7 +21,6 @@ class MenuViewController: UIViewController {
     // MARK: - Deleagate
     
     weak var delegate: ContainerViewControllerDelegate?
-    weak var NFCdelegate: NewsFeedScreenControllerDelegate?
     
     // MARK: - Life Cycle
 
@@ -117,29 +114,17 @@ extension MenuViewController: UITableViewDelegate {
             tableView.deselectRow(at: indexPath, animated: true)
             AppCoordinator.shared.goToSettingsScreenController(from: self)
         } else {
-            if NetStatus.shared.isConnected {
-                categoryName = menuModel.description
-                self.NFCdelegate?.category = menuModel
-                self.NFCdelegate?.fetchNews(using: menuModel, nil)
-                self.delegate?.shouldMoveBackController()
-                self.NFCdelegate?.didStartSpinner()
-            } else {
-                categoryName = menuModel.description
-                StorageManager.shared.removeAll()
-                DispatchQueue.main.async {
-                    self.delegate?.shouldMoveBackController()
-                    self.NFCdelegate?.reloadTableView()
-                    self.NFCdelegate?.didStartSpinner()
-                }
-            }
+            categoryName = menuModel.description
+            self.delegate?.shouldReloadData(using: menuModel)
+            self.delegate?.shouldMoveBackController()
             
-            if StorageManager.shared.models.isEmpty {
-                NetStatus.shared.netStatusChangeHandler = { [unowned self] in
-                    if NetStatus.shared.isMonitoring, NetStatus.shared.isConnected {
-                        self.NFCdelegate?.fetchNews(using: menuModel, nil)
-                    }
-                }
-            }
+//            if StorageManager.shared.models.isEmpty {
+//                NetStatus.shared.netStatusChangeHandler = { [unowned self] in
+//                    if NetStatus.shared.isMonitoring, NetStatus.shared.isConnected {
+//                        self.NFCdelegate?.fetchNews(using: menuModel, nil)
+//                    }
+//                }
+//            }
         }
     }
 }

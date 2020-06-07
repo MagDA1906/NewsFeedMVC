@@ -25,7 +25,7 @@ protocol StorageManagerProtocol {
     // remove all models
     func removeAll()
     // filtering models by searching from SearchBar
-    func filteringModels(by searchingString: String)
+    func filteringModels(by searchingString: String?, with category: MenuModel)
 }
 
 class StorageManager: StorageManagerProtocol {
@@ -35,10 +35,12 @@ class StorageManager: StorageManagerProtocol {
     init() {}
     
     var models = [NewsModel]()
+    var currentModels = [NewsModel]()
     
     func save(data: [NewsModel], by category: MenuModel) {
         // prepare before save
         models.removeAll()
+        
         var sortedModels = sortByDate(data)
         
         for index in sortedModels.indices {
@@ -46,50 +48,70 @@ class StorageManager: StorageManagerProtocol {
             sortedModels[index].newsDescription.replacingNewlineCharWithSpace()
             sortedModels[index].newsDescription.replacingDoubleSpace()
         }
+        
+        models = sortedModels
+        
         // save models by category
         if category == .AllNews {
-            models = sortedModels
+            currentModels = models
         } else {
             for model in sortedModels {
                 let categoryFromModel = model.category
                 if categoryFromModel == category.description {
-                    models.append(model)
+                    currentModels.append(model)
                 }
             }
         }
     }
         
     func getModel(by indexPath: IndexPath) -> NewsModel {
-        return models[indexPath.row]
+        return currentModels[indexPath.row]
     }
     
     func getNumberOfElements() -> Int {
-        return models.count
+        return currentModels.count
     }
     
     func setModelToViewedState(by indexPath: IndexPath) {
-        models[indexPath.row].isViewed = true
+        currentModels[indexPath.row].isViewed = true
+        for index in models.indices {
+            print("Model = \(models[index])")
+            print("Current = \(currentModels[indexPath.row])")
+            if models[index] == currentModels[indexPath.row] {
+                models[index].isViewed = true
+            }
+        }
     }
     
     func removeAll() {
         models.removeAll()
+        currentModels = models
     }
     
-    func filteringModels(by searchingString: String) {
-        print("Models count = \(models.count)")
+    func filteringModels(by searchingString: String?, with category: MenuModel) {
+        
         var filteringArray = [NewsModel]()
-        for model in models {
-            if model.newsTitle.localizedCaseInsensitiveContains(searchingString) || model.newsDescription.localizedCaseInsensitiveContains(searchingString) {
-                filteringArray.append(model)
+        
+        if category == .AllNews {
+            currentModels = models
+        } else {
+            currentModels.removeAll()
+            for model in models {
+                let categoryFromModel = model.category
+                if categoryFromModel == category.description {
+                    currentModels.append(model)
+                }
             }
         }
-        print("filteringArray count = \(filteringArray.count)")
-        models.removeAll()
-        models = filteringArray
-    }
-    
-    deinit {
-        print("StorageManager class is deinit!")
+        
+        if searchingString != nil {
+            for model in currentModels {
+                if model.newsTitle.localizedCaseInsensitiveContains(searchingString!) || model.newsDescription.localizedCaseInsensitiveContains(searchingString!) {
+                    filteringArray.append(model)
+                }
+            }
+            currentModels = filteringArray
+        }
     }
 }
 
@@ -102,5 +124,7 @@ private extension StorageManager {
         })
         return sortedModelsByDate
     }
+    
+    
 }
 

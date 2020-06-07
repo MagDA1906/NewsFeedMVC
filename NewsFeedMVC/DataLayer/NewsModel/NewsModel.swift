@@ -13,7 +13,7 @@ private enum ReturnType {
     case returnDate
 }
 
-struct NewsModel: Hashable, Equatable {
+struct NewsModel: Hashable {
     
     var isViewed = false
     
@@ -45,6 +45,19 @@ struct NewsModel: Hashable, Equatable {
     
     init() {}
     
+}
+
+extension NewsModel: Equatable {
+    
+    static func == (lhs: NewsModel, rhs: NewsModel) -> Bool {
+        return lhs.newsResource == rhs.newsResource &&
+            lhs.newsLink == rhs.newsLink &&
+            lhs.newsTitle == rhs.newsTitle &&
+            lhs.newsDescription == rhs.newsDescription &&
+            lhs.dateOfCreation == rhs.dateOfCreation &&
+            lhs.imageURL == rhs.imageURL &&
+            lhs.category == rhs.category
+    }
 }
 
 private extension NewsModel {
