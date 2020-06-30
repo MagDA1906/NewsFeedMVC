@@ -8,5 +8,6 @@ target 'NewsFeedMVC' do
   pod 'SDWebImage', '4.4.7'
   pod 'Alamofire', '~> 5.0'
   pod "SwiftyXMLParser", :git => 'https://github.com/yahoojapan/SwiftyXMLParser.git'
+  pod 'RealmSwift'
 
 end

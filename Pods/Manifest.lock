@@ -1,5 +1,10 @@
 PODS:
   - Alamofire (5.0.5)
+  - Realm (4.4.0):
+    - Realm/Headers (= 4.4.0)
+  - Realm/Headers (4.4.0)
+  - RealmSwift (4.4.0):
+    - Realm (= 4.4.0)
   - SDWebImage (4.4.7):
     - SDWebImage/Core (= 4.4.7)
   - SDWebImage/Core (4.4.7)
@@ -7,12 +12,15 @@ PODS:
 
 DEPENDENCIES:
   - Alamofire (~> 5.0)
+  - RealmSwift
   - SDWebImage (= 4.4.7)
   - SwiftyXMLParser (from `https://github.com/yahoojapan/SwiftyXMLParser.git`)
 
 SPEC REPOS:
   trunk:
     - Alamofire
+    - Realm
+    - RealmSwift
     - SDWebImage
 
 EXTERNAL SOURCES:
@@ -26,9 +34,11 @@ CHECKOUT OPTIONS:
 
 SPEC CHECKSUMS:
   Alamofire: df2f8f826963b08b9a870791ad48e07a10090b2e
+  Realm: e125f464884cda953ebefe70c671b75b03b81b9b
+  RealmSwift: 33656a42bd300959a081fc13347376bc478071af
   SDWebImage: c10d14a8883ebd89664f02a422006f66a85c0c5d
   SwiftyXMLParser: 8271497e0a37b5c04b0b167c77b4896e36175a21
 
-PODFILE CHECKSUM: c3b1e97f66ab8bf66a4e9c1bb33e3be79ff92ee3
+PODFILE CHECKSUM: e3e0bca40ce0ab98a3e839b89e70671f6aa821d6
 
-COCOAPODS: 1.8.3
+COCOAPODS: 1.9.3

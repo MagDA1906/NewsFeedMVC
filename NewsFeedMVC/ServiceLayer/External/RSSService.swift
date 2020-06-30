@@ -17,9 +17,6 @@ class RSSService: NSObject, RSSServiceProtocol {
     
     // MARK: - News
     
-//    private var lentaNews  = [NewsModel]()
-//    private var gazetaNews = [NewsModel]()
-    
     private var lentaNews: [NewsModel]?
     private var gazetaNews: [NewsModel]?
     

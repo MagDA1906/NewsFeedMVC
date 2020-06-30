@@ -7,11 +7,11 @@
 //
 
 import UIKit
+import RealmSwift
 
 protocol NewsFeedScreenControllerProtocol: class {
 
     func shouldReloadData(using selectedCategory: MenuModel)
-    
 }
 
 class NewsFeedScreenController: UIViewController {
@@ -82,6 +82,8 @@ class NewsFeedScreenController: UIViewController {
         configureTableView()
         configureSpinner()
         checkConnection()
+        
+        print(Realm.Configuration.defaultConfiguration.fileURL!)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -121,7 +123,69 @@ private extension NewsFeedScreenController {
             if StorageManager.shared.models.isEmpty {
                 if NetStatus.shared.isMonitoring, NetStatus.shared.isConnected {
                     self.fetchNews(using: .AllNews, nil)
+                } else {
+                    let realmModels = try! Realm().objects(RealmModel.self)
+                    if realmModels.count == 0 {
+                        print("Realm is empty!")
+                        self.showAlert()
+                    } else {
+                        DispatchQueue.main.async {
+                            let models = self.convertRealmModelToNewsModel()
+                            StorageManager.shared.save(data: models, by: .AllNews)
+                            self.reloadTableView()
+                            self.didStopSpinner()
+                        }
+                    }
                 }
+            }
+        }
+    }
+    
+    func convertRealmModelToNewsModel() -> [NewsModel] {
+        
+        var models = [NewsModel]()
+        let realmModels = try! Realm().objects(RealmModel.self)
+        
+        for rModel in realmModels {
+            
+            var model = NewsModel()
+            
+            model.isViewed = rModel.isViewed
+            model.newsResource = rModel.newsResource
+            model.newsLink = rModel.newsLink
+            model.newsTitle = rModel.newsTitle
+            model.newsDescription = rModel.newsDescription
+            model.imageURL = rModel.imageURL
+            model.dateOfCreation = rModel.dateOfCreation
+            model.category = rModel.category
+
+            models.append(model)
+        }
+        return models
+    }
+    
+    func convertNewsModelToRealmModel(_ models: [NewsModel]) {
+        
+        // Save Realm objects using raw data of models array
+        let realm = try! Realm()
+        try! realm.write() {
+            
+            realm.deleteAll()
+            
+            for model in models {
+                
+                let rModel = RealmModel()
+                
+                rModel.category = model.category
+                rModel.dateOfCreation = model.dateOfCreation
+                rModel.imageURL = model.imageURL
+                rModel.isViewed = model.isViewed
+                rModel.newsDescription = model.newsDescription
+                rModel.newsLink = model.newsLink
+                rModel.newsResource = model.newsResource
+                rModel.newsTitle = model.newsTitle
+                
+                realm.add(rModel)
             }
         }
     }
@@ -140,10 +204,12 @@ private extension NewsFeedScreenController {
         
         rssService.fetchNews { [weak self] (models, error) in
             guard let self = self else { return }
-            
             guard let models = models else { return }
+            self.convertNewsModelToRealmModel(models)
+            
             DispatchQueue.main.async {
                 
+                let models = self.convertRealmModelToNewsModel()
                 StorageManager.shared.save(data: models, by: category)
                 
                 self.reloadTableView()
@@ -163,6 +229,29 @@ private extension NewsFeedScreenController {
     func didStopSpinner() {
         
         spinner.stopAnimating()
+    }
+    
+    func showAlert() {
+
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+        // open settings screen
+        let settingsAction = UIAlertAction(title: "Settings", style: .default) { (action) in
+            guard let settingsURL = URL(string: UIApplication.openSettingsURLString) else { return }
+
+            if UIApplication.shared.canOpenURL(settingsURL) {
+                UIApplication.shared.open(settingsURL, completionHandler: { (success) in
+                    print("Settings opened: \(success)")
+                })
+            }
+        }
+
+        let alert = UIAlertController(title: "No internet connection",
+                                      message: "Check your internet connection using Settings button, or press OK",
+                                      preferredStyle: .alert)
+        alert.addAction(cancelAction)
+        alert.addAction(settingsAction)
+
+        self.present(alert, animated: true)
     }
     
     // MARK: - GestureRecognizer

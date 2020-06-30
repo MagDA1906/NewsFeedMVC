@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import RealmSwift
 
 private enum DateError: String {
     case dateDecodingError = "Date decoding failed"
@@ -79,6 +80,13 @@ class StorageManager: StorageManagerProtocol {
             print("Current = \(currentModels[indexPath.row])")
             if models[index] == currentModels[indexPath.row] {
                 models[index].isViewed = true
+                
+                let key = models[index].newsLink
+                let predicate = NSPredicate(format: "newsLink BEGINSWITH [c]%@", key)
+                let realm = try! Realm()
+                try! realm.write {
+                    realm.objects(RealmModel.self).filter(predicate).first?.isViewed = true
+                }
             }
         }
     }

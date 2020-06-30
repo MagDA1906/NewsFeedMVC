@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import RealmSwift
 
 private enum ReturnType {
     case returnString
@@ -84,4 +85,16 @@ private extension NewsModel {
         }
         return nil
     }
+}
+
+class RealmModel: Object {
+    
+    @objc dynamic var isViewed = false
+    @objc dynamic var newsResource: String = ""
+    @objc dynamic var newsLink: String = ""
+    @objc dynamic var newsTitle: String = ""
+    @objc dynamic var newsDescription: String = ""
+    @objc dynamic var imageURL: String = ""
+    @objc dynamic var category: String = ""
+    @objc dynamic var dateOfCreation = ""
 }

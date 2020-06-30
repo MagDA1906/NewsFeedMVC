@@ -53,6 +53,15 @@ class ContainerViewController: UIViewController, ContainerViewControllerDelegate
 
 private extension ContainerViewController {
     
+    func setBlurEffect(for containerView: UIView) -> UIVisualEffectView {
+        let blurEffect = UIBlurEffect(style: UIBlurEffect.Style.light)
+        let blurEffectView = UIVisualEffectView(effect: blurEffect)
+        blurEffectView.frame = containerView.bounds
+        blurEffectView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        self.blurEffectView = blurEffectView
+        return blurEffectView
+    }
+    
     // MARK: - Configure navigation item
     
     func configureNavigationItem() {
@@ -118,24 +127,28 @@ private extension ContainerViewController {
             // show menu
             UIView.animate(withDuration: 0.5,
                            delay: 0,
-                           usingSpringWithDamping: 0.8,
+                           usingSpringWithDamping: 0.7,
                            initialSpringVelocity: 0,
                            options: .curveEaseInOut,
                            animations: {
                             self.controller.view.frame.origin.x = self.controller.view.frame.width - 140
-            }) { (finished) in
+                            (self.controller as! NewsFeedScreenController).view.addSubview(self.setBlurEffect(for: self.view))
+            }) { [unowned self] (finished) in
+                (self.controller as! NewsFeedScreenController).view.subviews.first?.isUserInteractionEnabled = false
                 print("Show menu")
             }
         } else {
             // remove menu
             UIView.animate(withDuration: 0.5,
                            delay: 0,
-                           usingSpringWithDamping: 0.8,
+                           usingSpringWithDamping: 0.7,
                            initialSpringVelocity: 0,
                            options: .curveEaseInOut,
                            animations: {
                             self.controller.view.frame.origin.x = 0
-            }) { (finished) in
+                            self.blurEffectView.removeFromSuperview()
+            }) { [unowned self] (finished) in
+                (self.controller as! NewsFeedScreenController).view.subviews.first?.isUserInteractionEnabled = true
                 print("Remove menu")
             }
         }
