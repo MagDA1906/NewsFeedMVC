@@ -52,15 +52,9 @@ final class AppCoordinator {
     
     func goToSettingsScreenController(from source: UIViewController) {
         
-//        let vc = SettingsScreenController()
-//        vc.title = "Settings"
-//        vc.modalPresentationStyle = .custom
-//        vc.modalTransitionStyle = .coverVertical
-//        source.present(vc, animated: true, completion: nil)
-        
         let vc = SettingsScreenController()
-        detailsTransitioningDelegate = InteractiveModalTransitioningDelegate(from: source, to: vc)
         vc.modalPresentationStyle = .custom
+        detailsTransitioningDelegate = InteractiveModalTransitioningDelegate(from: source, to: vc)
         vc.transitioningDelegate = detailsTransitioningDelegate
         source.present(vc, animated: true, completion: nil)
     }

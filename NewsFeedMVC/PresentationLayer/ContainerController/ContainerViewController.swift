@@ -22,6 +22,7 @@ class ContainerViewController: UIViewController, ContainerViewControllerDelegate
     private var blurEffectView: UIVisualEffectView!
     private var isMove = false
     private var categoryName = "Картина дня"
+    private var isVertical = false
     
     // MARK: - Life Cycle
 
@@ -30,6 +31,7 @@ class ContainerViewController: UIViewController, ContainerViewControllerDelegate
         
         configureNavigationItem()
         addSettingsBarButton()
+        addOptionsBarButton()
         configureNewsFeedController()
         
         
@@ -82,17 +84,35 @@ private extension ContainerViewController {
     
     // MARK: - Create Settings Bar Button
     
+    func addOptionsBarButton() {
+        
+        let optionsBarButton = UIBarButtonItem(image: SourceImages.menuIcon,
+                                                style: .plain,
+                                                target: self,
+                                                action: #selector(actionOptionsButton))
+        optionsBarButton.tintColor = .white
+        navigationItem.setLeftBarButton(optionsBarButton, animated: true)
+    }
+    
+    @objc func actionOptionsButton(sender: UIBarButtonItem) {
+        
+        toggleMenu()
+    }
+    
+    // MARK: - Create
+    
     func addSettingsBarButton() {
         
         let settingsBarButton = UIBarButtonItem(image: SourceImages.settingsIcon,
                                                 style: .plain,
                                                 target: self,
                                                 action: #selector(actionSettingsButton))
-        navigationItem.setLeftBarButton(settingsBarButton, animated: true)
+        navigationItem.setRightBarButton(settingsBarButton, animated: true)
     }
     
     @objc func actionSettingsButton() {
-        toggleMenu()
+        guard let vc = controller as? NewsFeedScreenController else { return }
+        AppCoordinator.shared.goToSettingsScreenController(from: vc)
     }
     
     // MARK: - Initialized NewsFeedScreenController
