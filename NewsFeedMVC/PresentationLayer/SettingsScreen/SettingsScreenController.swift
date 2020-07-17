@@ -91,6 +91,7 @@ private extension SettingsScreenController {
     }
     
     @objc func actionConfirmButton(_ sender: UIButton) {
+        print("ConfirmButton pressed!")
         dismiss(animated: true, completion: nil)
     }
 }

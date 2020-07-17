@@ -25,8 +25,6 @@ enum MenuModel: Int, CustomStringConvertible {
     case Travels
     case FromLife
     case House
-//    case NationalPrijects
-    case Settings
     
     var description: String {
         switch self {
@@ -44,8 +42,6 @@ enum MenuModel: Int, CustomStringConvertible {
         case .Travels: return "Путешествия"
         case .FromLife: return "Из жизни"
         case .House: return "Дом"
-//        case .NationalProjects: return "Нацпроекты"
-        case .Settings: return "Настройки"
         }
     }
     
@@ -65,8 +61,6 @@ enum MenuModel: Int, CustomStringConvertible {
         case .Travels: return UIImage(named: "Travels") ?? UIImage()
         case .FromLife: return UIImage(named: "FromLife") ?? UIImage()
         case .House: return UIImage(named: "House") ?? UIImage()
-//        case .NationalProjects: return UIImage(named: "NationalProjects") ?? UIImage()
-        case .Settings: return UIImage(named: "Settings") ?? UIImage()
         }
     }
 }

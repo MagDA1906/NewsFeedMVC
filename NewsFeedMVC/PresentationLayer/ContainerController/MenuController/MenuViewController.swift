@@ -101,7 +101,7 @@ private extension MenuViewController {
 extension MenuViewController: UITableViewDelegate {
     // TODO: - After back from SettingsController - selection on Settings
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-
+        
         guard let cell = tableView.cellForRow(at: indexPath) as? MenuTableViewCell else {
             return
         }
@@ -110,22 +110,18 @@ extension MenuViewController: UITableViewDelegate {
         guard let menuModel = MenuModel(rawValue: indexPath.row) else {
             return
         }
-        if menuModel == MenuModel.Settings {
-            tableView.deselectRow(at: indexPath, animated: true)
-            AppCoordinator.shared.goToSettingsScreenController(from: self)
-        } else {
-            categoryName = menuModel.description
-            self.delegate?.shouldReloadData(using: menuModel)
-            self.delegate?.shouldMoveBackController()
-            
-//            if StorageManager.shared.models.isEmpty {
-//                NetStatus.shared.netStatusChangeHandler = { [unowned self] in
-//                    if NetStatus.shared.isMonitoring, NetStatus.shared.isConnected {
-//                        self.NFCdelegate?.fetchNews(using: menuModel, nil)
-//                    }
-//                }
-//            }
-        }
+        categoryName = menuModel.description
+        self.delegate?.shouldReloadData(using: menuModel)
+        self.delegate?.shouldMoveBackController()
+        
+        //            if StorageManager.shared.models.isEmpty {
+        //                NetStatus.shared.netStatusChangeHandler = { [unowned self] in
+        //                    if NetStatus.shared.isMonitoring, NetStatus.shared.isConnected {
+        //                        self.NFCdelegate?.fetchNews(using: menuModel, nil)
+        //                    }
+        //                }
+        //            }
+        
     }
 }
 
@@ -134,7 +130,7 @@ extension MenuViewController: UITableViewDelegate {
 extension MenuViewController: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return MenuModel.Settings.rawValue + 1
+        return MenuModel.House.rawValue + 1
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {

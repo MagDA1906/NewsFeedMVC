@@ -12,22 +12,23 @@ import UIKit
 final class InteractiveModalTransitioningDelegate: NSObject, UIViewControllerTransitioningDelegate {
     
     var interactiveDismiss = true
-   
+    var transition = FadePresentAnimationController()
+    
     init(from presented: UIViewController, to presenting: UIViewController) {
         super.init()
     }
     
     // MARK: - UIViewControllerTransitioningDelegate
     
+    func animationController(forPresented presented: UIViewController, presenting: UIViewController, source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+        transition.presenting = true
+        transition.originFrame = presented.view.frame
+        return transition
+    }
+    
     func animationController(forDismissed dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-        return nil
-    }
-    
-    func presentationController(forPresented presented: UIViewController, presenting: UIViewController?, source: UIViewController) -> UIPresentationController? {
-        return InteractiveModalPresentationController(presentedViewController: presented, presenting: presenting)
-    }
-    
-    func interactionControllerForDismissal(using animator: UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning? {
-        return nil
+        transition.presenting = false
+        return transition
+        
     }
 }
