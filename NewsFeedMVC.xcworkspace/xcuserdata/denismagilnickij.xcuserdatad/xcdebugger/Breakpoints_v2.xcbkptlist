@@ -36,5 +36,69 @@
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "36F1C619-11F9-4583-BB37-5AE3F586AA33"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "NewsFeedMVC/ServiceLayer/NetStatus.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "59"
+            endingLineNumber = "59"
+            landmarkName = "deinit"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "1151EEDE-B03E-4539-AA66-7A8EA9E0E587"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "NewsFeedMVC/PresentationLayer/Coordinators/AppCoordinator.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "64"
+            endingLineNumber = "64"
+            landmarkName = "goToSettingsScreenController(from:)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "1151EEDE-B03E-4539-AA66-7A8EA9E0E587 - 18b8685ca5272dcb"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "NewsFeedMVC.AppCoordinator.goToSettingsScreenController(from: __C.UIViewController) -&gt; ()"
+                  moduleName = "NewsFeedMVC"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/denismagilnickij/Documents/Projects/NewsFeedMVC/NewsFeedMVC/PresentationLayer/Coordinators/AppCoordinator.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "64"
+                  endingLineNumber = "64"
+                  offsetFromSymbolStart = "942">
+               </Location>
+               <Location
+                  uuid = "1151EEDE-B03E-4539-AA66-7A8EA9E0E587 - d4b99a7503d5889"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 (Swift.Float) -&gt; () in NewsFeedMVC.AppCoordinator.goToSettingsScreenController(from: __C.UIViewController) -&gt; ()"
+                  moduleName = "NewsFeedMVC"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/denismagilnickij/Documents/Projects/NewsFeedMVC/NewsFeedMVC/PresentationLayer/Coordinators/AppCoordinator.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "65"
+                  endingLineNumber = "65"
+                  offsetFromSymbolStart = "38">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
    </Breakpoints>
 </Bucket>

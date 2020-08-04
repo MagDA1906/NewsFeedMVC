@@ -17,8 +17,9 @@ enum SourceColors {
     static let commonBackgroundColor  = UIColor(named: "commonBackgroundColor")!
     static let commonDarkGreyColor    = UIColor(named: "commonDarkGreyColor")!
     static let commonLightGreyColor   = UIColor(named: "commonLightGreyColor")!
-    static let commonDarkBlueColor   = UIColor(named: "commonDarkBlueColor")!
+    static let commonDarkBlueColor    = UIColor(named: "commonDarkBlueColor")!
     static let commonLightBlueColor   = UIColor(named: "commonLightBlueColor")!
+    static let commonDarkRedColor     = UIColor(named: "commonDarkRedColor")!
     
     // MARK: - Labels Color
     

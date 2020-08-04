@@ -52,10 +52,17 @@ final class AppCoordinator {
     
     func goToSettingsScreenController(from source: UIViewController) {
         
+        
         let vc = SettingsScreenController()
         vc.modalPresentationStyle = .custom
         detailsTransitioningDelegate = InteractiveModalTransitioningDelegate(from: source, to: vc)
         vc.transitioningDelegate = detailsTransitioningDelegate
         source.present(vc, animated: true, completion: nil)
+        
+        guard let source = source as? NewsFeedScreenController else { return }
+        
+        vc.closure = { interval in
+            source.shouldReloadData(using: TimeInterval(interval))
+        }
     }
 }

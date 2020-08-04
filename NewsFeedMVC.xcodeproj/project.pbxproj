@@ -18,6 +18,7 @@
 		9D45D896236797CF00CDBE20 /* RSSServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D45D895236797CF00CDBE20 /* RSSServiceProtocol.swift */; };
 		9D45D8982367985700CDBE20 /* RSSService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D45D8972367985700CDBE20 /* RSSService.swift */; };
 		9D45D89A2367987A00CDBE20 /* NewsParserProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D45D8992367987A00CDBE20 /* NewsParserProtocol.swift */; };
+		9D46804A24C8DF070005B6ED /* UserSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D46804924C8DF070005B6ED /* UserSettings.swift */; };
 		9D600ABC23F9CA6700356338 /* InteractiveModalTransitioningDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D600ABB23F9CA6700356338 /* InteractiveModalTransitioningDelegate.swift */; };
 		9D6BDF502368E2FC00484A9B /* SourceColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D6BDF4F2368E2FC00484A9B /* SourceColors.swift */; };
 		9D6BDF522368E44C00484A9B /* Colors.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9D6BDF512368E44C00484A9B /* Colors.xcassets */; };
@@ -32,7 +33,7 @@
 		9D7E66F42395C21D000BC5C1 /* NewsSourceScreenController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D7E66F22395C21D000BC5C1 /* NewsSourceScreenController.swift */; };
 		9D82DA8723A02C2700D92BC3 /* UIViewExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D82DA8623A02C2700D92BC3 /* UIViewExtension.swift */; };
 		9D8BFB7223B01128009A86E3 /* SettingsScreenController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D8BFB7023B01128009A86E3 /* SettingsScreenController.swift */; };
-		9D8BFB7323B01128009A86E3 /* SettingsScreenViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9D8BFB7123B01128009A86E3 /* SettingsScreenViewController.xib */; };
+		9D8BFB7323B01128009A86E3 /* SettingsScreenController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9D8BFB7123B01128009A86E3 /* SettingsScreenController.xib */; };
 		9D91CDFB23983E2C007763A1 /* StartScreenViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D91CDF923983E2C007763A1 /* StartScreenViewController.swift */; };
 		9D91CDFC23983E2C007763A1 /* StartScreenViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9D91CDFA23983E2C007763A1 /* StartScreenViewController.xib */; };
 		9D959C3223B15A3200277EAE /* ContainerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D959C3123B15A3200277EAE /* ContainerViewController.swift */; };
@@ -64,6 +65,7 @@
 		9D45D895236797CF00CDBE20 /* RSSServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RSSServiceProtocol.swift; sourceTree = "<group>"; };
 		9D45D8972367985700CDBE20 /* RSSService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RSSService.swift; sourceTree = "<group>"; };
 		9D45D8992367987A00CDBE20 /* NewsParserProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewsParserProtocol.swift; sourceTree = "<group>"; };
+		9D46804924C8DF070005B6ED /* UserSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserSettings.swift; sourceTree = "<group>"; };
 		9D600ABB23F9CA6700356338 /* InteractiveModalTransitioningDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InteractiveModalTransitioningDelegate.swift; sourceTree = "<group>"; };
 		9D6BDF4F2368E2FC00484A9B /* SourceColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SourceColors.swift; sourceTree = "<group>"; };
 		9D6BDF512368E44C00484A9B /* Colors.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Colors.xcassets; sourceTree = "<group>"; };
@@ -78,7 +80,7 @@
 		9D7E66F22395C21D000BC5C1 /* NewsSourceScreenController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewsSourceScreenController.swift; sourceTree = "<group>"; };
 		9D82DA8623A02C2700D92BC3 /* UIViewExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIViewExtension.swift; sourceTree = "<group>"; };
 		9D8BFB7023B01128009A86E3 /* SettingsScreenController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsScreenController.swift; sourceTree = "<group>"; };
-		9D8BFB7123B01128009A86E3 /* SettingsScreenViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SettingsScreenViewController.xib; sourceTree = "<group>"; };
+		9D8BFB7123B01128009A86E3 /* SettingsScreenController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SettingsScreenController.xib; sourceTree = "<group>"; };
 		9D91CDF923983E2C007763A1 /* StartScreenViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartScreenViewController.swift; sourceTree = "<group>"; };
 		9D91CDFA23983E2C007763A1 /* StartScreenViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = StartScreenViewController.xib; sourceTree = "<group>"; };
 		9D959C3123B15A3200277EAE /* ContainerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContainerViewController.swift; sourceTree = "<group>"; };
@@ -179,6 +181,7 @@
 		9D4591E72367765900B1A0C3 /* ServiceLayer */ = {
 			isa = PBXGroup;
 			children = (
+				9D46804924C8DF070005B6ED /* UserSettings.swift */,
 				9DA480302438A8F600D82A03 /* StorageManager.swift */,
 				9D042B48244F1FB300685CBD /* NetStatus.swift */,
 				9D4591E8236776D700B1A0C3 /* External */,
@@ -278,7 +281,7 @@
 			isa = PBXGroup;
 			children = (
 				9D8BFB7023B01128009A86E3 /* SettingsScreenController.swift */,
-				9D8BFB7123B01128009A86E3 /* SettingsScreenViewController.xib */,
+				9D8BFB7123B01128009A86E3 /* SettingsScreenController.xib */,
 			);
 			path = SettingsScreen;
 			sourceTree = "<group>";
@@ -401,7 +404,7 @@
 				9D6BDF522368E44C00484A9B /* Colors.xcassets in Resources */,
 				9DA084B4236B87AC00BBB952 /* ExtendedNewsTableViewCell.xib in Resources */,
 				9D4591DA2367751E00B1A0C3 /* Assets.xcassets in Resources */,
-				9D8BFB7323B01128009A86E3 /* SettingsScreenViewController.xib in Resources */,
+				9D8BFB7323B01128009A86E3 /* SettingsScreenController.xib in Resources */,
 				9D7C5CB1236F6B3E004F81D5 /* DefaultNewsTableViewCell.xib in Resources */,
 				9D91CDFC23983E2C007763A1 /* StartScreenViewController.xib in Resources */,
 				9D7C5CA9236F6901004F81D5 /* LaunchScreen.storyboard in Resources */,
@@ -464,6 +467,7 @@
 				9D45D88F23678B2400CDBE20 /* NewsModel.swift in Sources */,
 				9D4591ED23677ADE00B1A0C3 /* AppCoordinator.swift in Sources */,
 				9D959C3B23B17C7700277EAE /* MenuModel.swift in Sources */,
+				9D46804A24C8DF070005B6ED /* UserSettings.swift in Sources */,
 				9D7C5CB3236F7DE1004F81D5 /* Task.swift in Sources */,
 				9D959C3923B1754800277EAE /* MenuTableViewCell.swift in Sources */,
 				9D7C5CB0236F6B3E004F81D5 /* DefaultNewsTableViewCell.swift in Sources */,

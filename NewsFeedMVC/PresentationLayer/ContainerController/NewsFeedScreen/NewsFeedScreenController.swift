@@ -16,12 +16,14 @@ protocol NewsFeedScreenControllerProtocol: class {
 
 class NewsFeedScreenController: UIViewController {
     
+    typealias MultTime = Double
+    
     // MARK: - IBOutlets
     
     @IBOutlet private weak var tableView: UITableView!
 
-    
     private let rssService = RSSService()
+    private let multipleForTimeValue: MultTime = 60
     
     private enum State {
         
@@ -46,8 +48,8 @@ class NewsFeedScreenController: UIViewController {
     private var state: State = .collapsed
     private var newsCategory: MenuModel?
     private var timer: Timer?
-    private var canTransitionToLarge = false
     private var searchBar: UISearchBar!
+    private var refreshTimer: Timer?
     
     private var category: MenuModel? {
         get {
@@ -58,16 +60,16 @@ class NewsFeedScreenController: UIViewController {
         }
     }
     
+    private var defaultTime: TimeInterval {
+        return multipleForTimeValue * 35
+    }
+    
     // MARK: - Closures
     
     private let refreshControl: UIRefreshControl = {
         let refreshControl = UIRefreshControl()
-        refreshControl.addTarget(self, action: #selector(refresh(sender:)), for: .valueChanged)
+        refreshControl.addTarget(self, action: #selector(refreshAction(sender:)), for: .valueChanged)
         return refreshControl
-    }()
-    
-    private lazy var animator: UIViewPropertyAnimator = {
-        return UIViewPropertyAnimator(duration: 0.25, curve: .easeInOut, animations: nil)
     }()
     
     // MARK: - Life Cycle
@@ -90,6 +92,7 @@ class NewsFeedScreenController: UIViewController {
         super.viewWillAppear(animated)
         print("NewsFeedScreenController reload table view!")
         
+        startRefreshTimer(with: nil)
         startMonitoringNetStatus()
         tableView.reloadData()
     }
@@ -99,6 +102,16 @@ class NewsFeedScreenController: UIViewController {
         
         tableView.tableHeaderView = searchBar
         searchBar.isHidden = false
+    }
+}
+
+// MARK: - Public Functions
+
+extension NewsFeedScreenController {
+    
+    func shouldReloadData(using timeInterval: TimeInterval?) {
+        
+        startRefreshTimer(with: timeInterval)
     }
 }
 
@@ -292,14 +305,17 @@ private extension NewsFeedScreenController {
             }
         }
     }
-    
     // Added refresh control function for update data
-    @objc func refresh(sender: UIRefreshControl) {
+    func fetchNewData() {
         if NetStatus.shared.isConnected {
             let category = newsCategory ?? MenuModel.AllNews
             print("\(category.description)")
             fetchNews(using: category, nil)
         }
+    }
+    
+    @objc func refreshAction(sender: UIRefreshControl) {
+        fetchNewData()
         sender.endRefreshing()
     }
     
@@ -363,7 +379,7 @@ private extension NewsFeedScreenController {
         }
     }
     
-    // MARK: - Configure Timer
+    // MARK: - Configure Timers
 
     func startTimerWith(_ searchingString: String) {
         
@@ -383,6 +399,37 @@ private extension NewsFeedScreenController {
             self.reloadTableView()
             timer.invalidate()
         })
+    }
+    
+    func startRefreshTimer(with timeInterval: TimeInterval?) {
+        
+        print("Start timer for update news")
+        
+        if refreshTimer != nil {
+            refreshTimer!.invalidate()
+            refreshTimer = nil
+        }
+        
+        guard let savedValue = UserSettings.timeValue else { return }
+        
+        if timeInterval != nil {
+            refreshTimer = Timer.scheduledTimer(withTimeInterval: timeInterval! * multipleForTimeValue, repeats: true, block: { [unowned self] (timer) in
+                print("Refresh timer is update with \(String(describing: timeInterval))!")
+                self.fetchNewData()
+            })
+        } else {
+            if savedValue == 0 {
+                refreshTimer = Timer.scheduledTimer(withTimeInterval: defaultTime, repeats: true, block: { [unowned self] (timer) in
+                    print("Refresh timer is update with \(String(describing: timeInterval))!")
+                    self.fetchNewData()
+                })
+            } else {
+                refreshTimer = Timer.scheduledTimer(withTimeInterval: TimeInterval(savedValue) * multipleForTimeValue, repeats: true, block: { [unowned self] (timer) in
+                    print("Refresh timer is update with \(String(describing: timeInterval))!")
+                    self.fetchNewData()
+                })
+            }
+        }
     }
     
     // MARK: - Create DefaultNewsTableViewCell

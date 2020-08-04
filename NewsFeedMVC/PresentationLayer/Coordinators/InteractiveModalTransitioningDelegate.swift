@@ -22,7 +22,7 @@ final class InteractiveModalTransitioningDelegate: NSObject, UIViewControllerTra
     
     func animationController(forPresented presented: UIViewController, presenting: UIViewController, source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
         transition.presenting = true
-        transition.originFrame = presented.view.frame
+        transition.originFrame = presenting.view.frame
         return transition
     }
     

@@ -53,10 +53,7 @@ class NetStatus {
     
     // MARK: - Init & Deinit
     
-    private init() {
-        
-    }
-    
+    private init() {}
     
     deinit {
         stopMonitoring()
@@ -87,6 +84,7 @@ class NetStatus {
         self.monitor = nil
         isMonitoring = false
         didStopMonitoringHandler?()
+        print("DidStopMonitoring")
     }
     
 }
